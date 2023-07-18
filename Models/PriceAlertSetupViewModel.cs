@@ -5,18 +5,18 @@ namespace Realert.Models
 {
     public class PriceAlertSetupViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Please enter your name.")]
         [StringLength(100)]
         public string? Name { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Please enter your email address.")]
         [StringLength(100)]
         public string? Email { get; set; }
 
-        [Range(1000, 100000)]
+        [Range(1000, 10000)]
         public uint PriceThreshold { get; set; }
 
-        [Required]
+        [Required (ErrorMessage = "Please enter the link to the propery listing.")]
         [StringLength(1000)]
         public string? ListingLink { get; set; }
 
@@ -24,7 +24,6 @@ namespace Realert.Models
 
         public bool NotifyOnPropertyDelist { get; set; }
 
-        [Required]
         public string? NotificationType { get; set; }
 
         [StringLength(10000)]

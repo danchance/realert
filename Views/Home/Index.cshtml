@@ -6,7 +6,7 @@
 
 <div>
     <form asp-action="Create">
-        <div class="grid grid-cols-2 gap-8 mb-6">
+        <div class="grid grid-cols-2 gap-8 mb-2">
             <div>
                 <label asp-for="Name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                 <div class="flex">
@@ -16,8 +16,8 @@
                         </svg>
                     </span>
                     <input asp-for="Name" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Dan Chance">
-                    <span asp-validation-for="Name" class="text-red-500"></span>
                 </div>
+                <span asp-validation-for="Name" class="block mt-2 text-red-500 text-sm"></span>
             </div>
             <div>
                 <label asp-for="Email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
@@ -28,11 +28,11 @@
                         </svg>
                     </span>
                     <input asp-for="Email" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="someone@email.com">
-                    <span asp-validation-for="Email" class="text-red-500"></span>
                 </div>
+                <span asp-validation-for="Email" class="block mt-2 text-red-500 text-sm"></span>
             </div>
         </div>
-        <div class="mb-6">
+        <div class="mb-4">
             <label asp-for="ListingLink" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Property Link</label>
             <div class="flex">
                 <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-r-0 border-gray-300 rounded-l-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
@@ -41,13 +41,24 @@
                     </svg>
                 </span>
                 <input asp-for="ListingLink" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="www.property.co.uk/abc">
-                <span asp-validation-for="ListingLink" class="text-red-500"></span>
             </div>
+            <span asp-validation-for="ListingLink" class="block mt-2 text-red-500 text-sm"></span>
         </div>
-        <div class="grid grid-cols-2 gap-8 mb-6">
+        <div class="grid grid-cols-2 gap-8 mb-4">
             <div class="">
                 <label asp-for="PriceThreshold" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Price Threshold</label>
-                <input asp-for="PriceThreshold" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="£1000">
+                <select asp-for="PriceThreshold" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    <option value="1000">£1,000</option>
+                    <option value="2000">£2,000</option>
+                    <option value="3000">£3,000</option>
+                    <option value="4000">£4,000</option>
+                    <option value="5000">£5,000</option>
+                    <option value="6000">£6,000</option>
+                    <option value="7000">£7,000</option>
+                    <option value="8000">£8,000</option>
+                    <option value="9000">£9,000</option>
+                    <option value="10000">£10,000</option>
+                </select>
             </div>
             <div class="">
                 <label asp-for="NotificationType" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notification Type</label>
@@ -57,10 +68,10 @@
                 </select>
             </div>
         </div>
-        <fieldset class="mb-6">
+        <fieldset class="mb-4">
             <legend class="sr-only">Notification Options</legend>
             <h3 class="text-sm font-medium text-gray-900 dark:text-gray-300 mb-2">Also recieve notifications when:</h3>
-            <div class="flex items-center mb-2">
+            <div class="flex items-center mb-1">
                 <input asp-for="NotifyOnPriceIncrease" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                 <label asp-for="NotifyOnPriceIncrease" class="ml-2 text-sm text-gray-900 dark:text-gray-300">Price increases</label>
             </div>
