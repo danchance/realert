@@ -6,27 +6,33 @@ namespace Realert.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
 
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        // POST: Home/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Name,Email,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+
+            }
+            else
+            {
+                return View("Index", priceAlert);
+            }
+            /*if (ModelState.IsValid)
+            {
+                _context.Add(movie);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }*/
+            return View("Index", priceAlert);
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
 }

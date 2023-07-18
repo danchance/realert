@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace Owne.Models
+namespace Realert.Models
 {
     public class PriceAlertSetupViewModel
     {

@@ -1,11 +1,11 @@
-﻿@model Owne.Models.PriceAlertSetupViewModel
+﻿@model Realert.Models.PriceAlertSetupViewModel
 
 @{
     ViewData["Title"] = "Home";
 }
 
 <div>
-    <form asp-action="">
+    <form asp-action="Create">
         <div class="grid grid-cols-2 gap-8 mb-6">
             <div>
                 <label asp-for="Name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
@@ -16,6 +16,7 @@
                         </svg>
                     </span>
                     <input asp-for="Name" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Dan Chance">
+                    <span asp-validation-for="Name" class="text-red-500"></span>
                 </div>
             </div>
             <div>
@@ -27,6 +28,7 @@
                         </svg>
                     </span>
                     <input asp-for="Email" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="someone@email.com">
+                    <span asp-validation-for="Email" class="text-red-500"></span>
                 </div>
             </div>
         </div>
@@ -39,12 +41,13 @@
                     </svg>
                 </span>
                 <input asp-for="ListingLink" type="text" class="rounded-none rounded-r-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="www.property.co.uk/abc">
+                <span asp-validation-for="ListingLink" class="text-red-500"></span>
             </div>
         </div>
         <div class="grid grid-cols-2 gap-8 mb-6">
             <div class="">
                 <label asp-for="PriceThreshold" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Price Threshold</label>
-                <input asp-for="PriceThreshold" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="£1000" required>
+                <input asp-for="PriceThreshold" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="£1000">
             </div>
             <div class="">
                 <label asp-for="NotificationType" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notification Type</label>
