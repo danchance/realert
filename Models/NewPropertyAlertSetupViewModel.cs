@@ -38,10 +38,12 @@ namespace Realert.Models
         [Range(0, 20000000)]
         public uint MaxPrice { get; set;}
 
-        [Range(0, 5)]
-        public byte MinBeds { get; set; }
+        [Required]
+        [RegularExpression("^$|0|1|2|3|4|5", ErrorMessage = "Valid values are: ' ', 0, 1, 2, 3, 4, 5 ")]
+        public string? MinBeds { get; set; }
 
-        [Range(0, 5)]
-        public byte MaxBeds { get; set;}
+        [Required]
+        [RegularExpression("^$|0|1|2|3|4|5", ErrorMessage = "Valid values are: ' ', 0, 1, 2, 3, 4, 5 ")]
+        public string? MaxBeds { get; set;}
     }
 }
