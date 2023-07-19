@@ -13,6 +13,10 @@ namespace Realert.Models
         [StringLength(100)]
         public string? Email { get; set; }
 
+        [Required(ErrorMessage = "Please enter your phone number.")]
+        [StringLength(11)]
+        public string? PhoneNumber { get; set; }
+
         [Range(1000, 10000)]
         public uint PriceThreshold { get; set; }
 
