@@ -4,23 +4,16 @@ namespace Realert.Models
 {
     public class NewPropertyAlertSetupViewModel
     {
-        [Required(ErrorMessage = "Please enter your name.")]
-        [StringLength(100)]
-        public string? Name { get; set; }
-
         [Required(ErrorMessage = "Please enter your email address.")]
         [StringLength(100)]
         public string? Email { get; set; }
-
-        [Required(ErrorMessage = "Please enter your phone number.")]
-        [StringLength(11)]
-        public string? PhoneNumber { get; set; }
 
         [Required(ErrorMessage = "Please give this notification a name")]
         [StringLength(100)]
         public string? NotificationName { get; set; }
 
         [Required]
+        [RegularExpression("1|3|7", ErrorMessage = "Valid values are 1, 3 or 7 days")]
         public string? NotificationFrequency { get; set; }
 
         [Required]
