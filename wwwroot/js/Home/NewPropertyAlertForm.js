@@ -33,11 +33,27 @@ const searchSettings = {
     propertyType: '',
     location: '',
     locationMessage: '',
-    searchRadius: '',
-    minPrice: '',
-    maxPrice: '',
+    searchRadius: '0',
+    minPrice: '0',
+    maxPrice: '0',
     minBeds: '',
     maxBeds: '',
+}
+
+/**
+ * This function initializes the values of the searchSettings to their
+ * defaults.
+ */
+function initializeSearchSettings() {
+    searchSettings.targetSite = '';
+    searchSettings.propertyType = '';
+    searchSettings.location = '';
+    searchSettings.locationMessage = '';
+    searchSettings.searchRadius = '0';
+    searchSettings.minPrice = '0';
+    searchSettings.maxPrice = '0';
+    searchSettings.minBeds = '';
+    searchSettings.maxBeds = '';
 }
 
 /**
@@ -97,19 +113,37 @@ function handleSearchLinkForm(e) {
 }
 
 /**
- * This function parses a Rightmove URL, extracting the property type, location,
- * search radius, min price, max price, min beds and max beds values.
+ * This function parses a Rightmove URL, extracting values from the following
+ * query parameters: property type, location, search radius, min price, max price,
+ * min beds and max beds values.
+ * If the query parameter does not exist then corresponding value in searchSettings
+ * will be left as the default.
  */
 function parseRightmoveURL(url) {
+    initializeSearchSettings();
     // Location field is formated: 'OUTCODE^XXXX'. Get all characters after the
     // '^'.
-    searchSettings.location = url.searchParams.get('locationIdentifier').split('^')[1];
-    searchSettings.searchRadius = url.searchParams.get('radius');
-    searchSettings.propertyType = url.searchParams.get('displayPropertyType');
-    searchSettings.minPrice = url.searchParams.get('minPrice');
-    searchSettings.maxPrice = url.searchParams.get('maxPrice');
-    searchSettings.minBeds = url.searchParams.get('minBedrooms');
-    searchSettings.maxBeds = url.searchParams.get('maxBedrooms');
+    if (url.searchParams.get('locationIdentifier') != null) {
+        searchSettings.location = url.searchParams.get('locationIdentifier').split('^')[1];
+    }
+    if (url.searchParams.get('radius') != null) {
+        searchSettings.searchRadius = url.searchParams.get('radius');
+    }
+    if (url.searchParams.get('displayPropertyType') != null) {
+        searchSettings.propertyType = url.searchParams.get('displayPropertyType');
+    }
+    if (url.searchParams.get('minPrice') != null) {
+        searchSettings.minPrice = url.searchParams.get('minPrice');
+    }
+    if (url.searchParams.get('maxPrice') != null) {
+        searchSettings.maxPrice = url.searchParams.get('maxPrice');
+    }
+    if (url.searchParams.get('minBedrooms') != null) {
+        searchSettings.minBeds = url.searchParams.get('minBedrooms');
+    }
+    if (url.searchParams.get('maxBedrooms') != null) {
+        searchSettings.maxBeds = url.searchParams.get('maxBedrooms');
+    }
     searchSettings.targetSite = 'Rightmove';
 
     // Rightmove uses 4 digit codes in the location parameter. Display a message
@@ -118,8 +152,48 @@ function parseRightmoveURL(url) {
 }
 
 /**
- * TODO: Add support for Purplebricks.
+ * This function parses a Purplebricks URL, extracting values from the following
+ * query parameters: property type, location, search radius, min price, max price,
+ * min beds and max beds values.
+ * If the query parameter does not exist then corresponding value in searchSettings
+ * will be left as the default.
  */
 function parsePurplebricksURL(url) {
+    initializeSearchSettings();
+    if (url.searchParams.get('location') != null) {
+        searchSettings.location = url.searchParams.get('location');
+    }
+    if (url.searchParams.get('searchRadius') != null) {
+        searchSettings.searchRadius = url.searchParams.get('searchRadius');
+    }
 
+    // Property type is numeric values 1-6, need to map these to the values
+    // of the dropdown list.
+    const propertyType = url.searchParams.get('type');
+    if (propertyType != null) {
+        let typeMapping = {
+            1: 'houses',
+            2: 'bungalows',
+            3: 'flats',
+            4: 'land',
+            5: 'commercial',
+            6: 'other'
+        }
+        if (typeMapping[propertyType] != null) {
+            searchSettings.propertyType = typeMapping[propertyType];
+        }
+    }
+    if (url.searchParams.get('priceFrom') != null) {
+        searchSettings.minPrice = url.searchParams.get('priceFrom');
+    }
+    if (url.searchParams.get('priceTo') != null) {
+        searchSettings.maxPrice = url.searchParams.get('priceTo');
+    }
+    if (url.searchParams.get('bedroomsFrom') != null) {
+        searchSettings.minBeds = url.searchParams.get('bedroomsFrom');
+    }
+    if (url.searchParams.get('bedroomsTo')) {
+        searchSettings.maxBeds = url.searchParams.get('bedroomsTo');
+    }
+    searchSettings.targetSite = 'Purplebricks';
 }

@@ -36,11 +36,11 @@ namespace Realert.Models
         public uint MaxPrice { get; set;}
 
         [Required]
-        [RegularExpression("^$|0|1|2|3|4|5", ErrorMessage = "Valid values are: ' ', 0, 1, 2, 3, 4, 5 ")]
+        [RegularExpression("^$|0|1|2|3|4|5|6|7|8|9|10", ErrorMessage = "Valid values are: ' ' and 0-10")]
         public string? MinBeds { get; set; }
 
         [Required]
-        [RegularExpression("^$|0|1|2|3|4|5", ErrorMessage = "Valid values are: ' ', 0, 1, 2, 3, 4, 5 ")]
+        [RegularExpression("^$|0|1|2|3|4|5|6|7|8|9|10", ErrorMessage = "Valid values are: ' ' and 0-10")]
         public string? MaxBeds { get; set;}
     }
 }
