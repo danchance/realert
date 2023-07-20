@@ -13,6 +13,10 @@ namespace Realert.Models
         public string? NotificationName { get; set; }
 
         [Required]
+        [StringLength(200)]
+        public string? TargetSite { get; set; }
+
+        [Required]
         [RegularExpression("1|3|7", ErrorMessage = "Valid values are 1, 3 or 7 days")]
         public string? NotificationFrequency { get; set; }
 
