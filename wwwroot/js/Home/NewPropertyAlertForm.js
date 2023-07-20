@@ -1,9 +1,14 @@
 ﻿/**
- * Form input fields.
+ * Search form fields
+ */
+const propertyLinkInput = document.querySelector('#property-link');
+const propertyLinkErrorText = document.querySelector('#property-link-error');
+
+/**
+ * New Property Alert form fields.
  */
 const newPropertyAlertForm = document.querySelector('#new-property-alert-form');
 const targetSiteText = document.querySelector('#target-site');
-const propertyLinkInput = document.querySelector('#property-link');
 const propertyTypeInput = document.querySelector('#property-type');
 const locationInput = document.querySelector('#location');
 const locationText = document.querySelector('#location-message');
@@ -39,11 +44,30 @@ const searchSettings = {
  * Form handler for the Property URL form.
  * Parses the URL to determine the website and property search settings.
  */
-const handleSearchLinkForm = (e) => {
+function handleSearchLinkForm(e) {
     e.preventDefault();
-    const url = new URL(propertyLinkInput.value);
 
-    // Parse the URL parameters depending on the property site entered.
+    // Clear previous errors.
+    propertyLinkErrorText.textContent = '';
+
+    // If nothing entered, keep the main property alert form hidden.
+    if (propertyLinkInput.value === '') {
+        newPropertyAlertForm.classList.add('hidden');
+        return;
+    }
+
+    // Attempt to parse the URL. Set an error message if the URL is invalid.
+    let url = "";
+    try {
+        url = new URL(propertyLinkInput.value);
+    } catch (error) {
+        newPropertyAlertForm.classList.add('hidden');
+        propertyLinkErrorText.textContent = 'Please enter a valid URL. Supported sites are: Rightmove and Purplebricks.';
+        return;
+    }
+
+    // Parse the URL parameters depending on the property site entered. Give an 
+    // error if the site is not currently suppported.
     switch (url.hostname) {
         case RIGHTMOVE_HOSTNAME:
             parseRightmoveURL(url);
@@ -52,7 +76,9 @@ const handleSearchLinkForm = (e) => {
             parsePurplebricksURL(url);
             break;
         default:
-            console.log("this property site is not supported");
+            newPropertyAlertForm.classList.add('hidden');
+            propertyLinkErrorText.textContent = 'This site is not currently supported. Please enter a Rightmove or Purplebricks link.';
+            return;
     }
 
     // Default in values parsed from the URL.
@@ -68,15 +94,13 @@ const handleSearchLinkForm = (e) => {
 
     // Display the notification setup form.
     newPropertyAlertForm.classList.remove("hidden");
-
-    console.log(searchSettings)
 }
 
 /**
  * This function parses a Rightmove URL, extracting the property type, location,
  * search radius, min price, max price, min beds and max beds values.
  */
-const parseRightmoveURL = (url) => {
+function parseRightmoveURL(url) {
     // Location field is formated: 'OUTCODE^XXXX'. Get all characters after the
     // '^'.
     searchSettings.location = url.searchParams.get('locationIdentifier').split('^')[1];
@@ -94,8 +118,8 @@ const parseRightmoveURL = (url) => {
 }
 
 /**
- * 
+ * TODO: Add support for Purplebricks.
  */
-const parsePurplebricksURL = (url) => {
+function parsePurplebricksURL(url) {
 
 }
