@@ -1,7 +1,14 @@
-﻿const notificationTypeInput = document.querySelector('#notification-type');
+﻿/**
+ * New Price Alert form fields.
+ */
+const notificationTypeInput = document.querySelector('#notification-type');
 const emailContainer = document.querySelector('#email-container');
 const phoneContainer = document.querySelector('#phone-container');
 
+/**
+ * Define notifcation type values.
+ * Note: These values must match the enum values in the model.
+ */
 const notificationType = {
     email: '0',
     phone: '1',
@@ -13,8 +20,6 @@ const notificationType = {
  */
 const notificationTypeChanged = () => {
     // Text notification type selected.
-    console.log(notificationTypeInput.value);
-    console.log(notificationType['phone']);
     if (notificationTypeInput.value === notificationType["phone"]) {
         phoneContainer.classList.remove('hidden');
         emailContainer.classList.add('hidden');
@@ -27,3 +32,10 @@ const notificationTypeChanged = () => {
 
 // Set the correct contact details input (email or phone) when the page is loaded.
 notificationTypeChanged();
+
+/**
+* Add a page load event listener.
+* Display the correct contact details input field (email or phone) when the page
+* is loaded.
+*/
+addEventListener('load', () => notificationTypeChanged());
