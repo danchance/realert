@@ -1,4 +1,6 @@
-﻿namespace Realert.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Realert.Models
 {
     public enum Notification
     {
@@ -23,6 +25,8 @@
         public bool NotifyOnPropertyDelist { get; set; }
         public Notification NotificationType { get; set; }
         public string? Note { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime CreatedAt { get; set; }
 
         public PriceAlertProperty? Property { get; set; }
     }

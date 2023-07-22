@@ -15,7 +15,7 @@ namespace Realert.Controllers
         // POST: Home/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Email,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
+        public async Task<IActionResult> Create([Bind("Name,Email")] NewPropertyAlertSetupViewModel priceAlert)
         {
             if (ModelState.IsValid)
             {
