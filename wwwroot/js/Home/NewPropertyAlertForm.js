@@ -18,6 +18,7 @@ const minPriceInput = document.querySelector('#min-price');
 const maxPriceInput = document.querySelector('#max-price');
 const minBedsInput = document.querySelector('#min-beds');
 const maxBedsInput = document.querySelector('#max-beds');
+const searchLinkInput = document.querySelector('#search-link');
 
 /**
  * Supported property site hostnames and internal Ids.
@@ -102,8 +103,6 @@ function handleSearchLinkForm(e) {
         return;
     }
 
-    
-
     // Default in values parsed from the URL.
     targetSiteText.textContent = searchSettings.targetSiteText;
     targetSiteInput.value = searchSettings.targetSite;
@@ -115,6 +114,7 @@ function handleSearchLinkForm(e) {
     maxPriceInput.value = searchSettings.maxPrice;
     minBedsInput.value = searchSettings.minBeds;
     maxBedsInput.value = searchSettings.maxBeds;
+    searchLinkInput.value = propertyLinkInput.value;
 
     // Display the notification setup form.
     newPropertyAlertForm.classList.remove("hidden");
@@ -220,3 +220,15 @@ function parsePurplebricksURL(url) {
     searchSettings.targetSiteText = 'Purplebricks';
     searchSettings.targetSite = PURPLEBRICKS_ID;
 }
+
+/**
+ * Add a page load event listener.
+ * If the page is loaded to display validation errors then we want to display
+ * the entire form and populate the search link in the 2nd form.
+ */
+addEventListener('load', () => {
+    if (searchLinkInput.value !== '') {
+        propertyLinkInput.value = searchLinkInput.value;
+        newPropertyAlertForm.classList.remove("hidden");
+    }
+});
