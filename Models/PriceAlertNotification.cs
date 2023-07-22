@@ -23,6 +23,7 @@ namespace Realert.Models
         /*
          * Users preferred name used when contacting them.
          */
+        [Required]
         public string? Name { get; set; }
 
         /*
@@ -38,6 +39,7 @@ namespace Realert.Models
          */
         public TargetSite TargetSite { get; private set; }
         private string? _listingLink;
+        [Required]
         public string? ListingLink 
         {
             get { return _listingLink; }
@@ -73,6 +75,7 @@ namespace Realert.Models
          * As there are no user accounts, DeleteCode is used to confirm the user 
          * deleting the notification is the one who is receiving the emails/texts.
          */
+        [Required]
         public string DeleteCode { get; private set; }
 
         /*

@@ -55,7 +55,6 @@ namespace Realert.Controllers
                 NotifyOnPropertyDelist = priceAlert.NotifyOnPropertyDelist,
                 NotificationType = priceAlert.NotificationType,
                 Note = priceAlert.Note,
-
             };
 
             // Listing link has additional validation requirements, catch any exceptions

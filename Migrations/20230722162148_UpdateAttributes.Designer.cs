@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Realert.Data;
 
@@ -11,9 +12,11 @@ using Realert.Data;
 namespace Realert.Migrations
 {
     [DbContext(typeof(RealertContext))]
-    partial class RealertContextModelSnapshot : ModelSnapshot
+    [Migration("20230722162148_UpdateAttributes")]
+    partial class UpdateAttributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
