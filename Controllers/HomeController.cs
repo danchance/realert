@@ -12,27 +12,5 @@ namespace Realert.Controllers
             return View();
         }
 
-        // POST: Home/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Email,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
-        {
-            if (ModelState.IsValid)
-            {
-
-            }
-            else
-            {
-                return View("Index", priceAlert);
-            }
-            /*if (ModelState.IsValid)
-            {
-                _context.Add(movie);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }*/
-            return View("Index", priceAlert);
-        }
-
     }
 }
