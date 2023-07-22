@@ -19,10 +19,13 @@ const minBedsInput = document.querySelector('#min-beds');
 const maxBedsInput = document.querySelector('#max-beds');
 
 /**
- * Supported property site hostnames.
+ * Supported property site hostnames and internal Ids.
  */
 const RIGHTMOVE_HOSTNAME = 'www.rightmove.co.uk';
 const PURPLEBRICKS_HOSTNAME = 'www.purplebricks.co.uk';
+const RIGHTMOVE_ID = 0;
+const PURPLEBRICKS_ID = 1;
+
 
 /**
  * Property search settings. Used to populate default values into the form
@@ -144,7 +147,7 @@ function parseRightmoveURL(url) {
     if (url.searchParams.get('maxBedrooms') != null) {
         searchSettings.maxBeds = url.searchParams.get('maxBedrooms');
     }
-    searchSettings.targetSite = 'Rightmove';
+    searchSettings.targetSite = RIGHTMOVE_ID;
 
     // Rightmove uses 4 digit codes in the location parameter. Display a message
     // explaining this.
@@ -195,5 +198,5 @@ function parsePurplebricksURL(url) {
     if (url.searchParams.get('bedroomsTo')) {
         searchSettings.maxBeds = url.searchParams.get('bedroomsTo');
     }
-    searchSettings.targetSite = 'Purplebricks';
+    searchSettings.targetSite = PURPLEBRICKS_ID;
 }

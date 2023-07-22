@@ -12,13 +12,11 @@ namespace Realert.Models
         [StringLength(100)]
         public string? NotificationName { get; set; }
 
-        [Required]
-        [StringLength(200)]
-        public string? TargetSite { get; set; }
+        public TargetSite TargetSite { get; set; }
 
         [Required]
         [RegularExpression("1|3|7", ErrorMessage = "Valid values are 1, 3 or 7 days")]
-        public string? NotificationFrequency { get; set; }
+        public byte NotificationFrequency { get; set; }
 
         [Required]
         public string? PropertyType { get; set; }
