@@ -12,15 +12,12 @@ namespace Realert.Models
         [StringLength(100)]
         public string? NotificationName { get; set; }
 
-        [Required]
-        [StringLength(200)]
-        public string? TargetSite { get; set; }
+        public TargetSite TargetSite { get; set; }
 
         [Required]
         [RegularExpression("1|3|7", ErrorMessage = "Valid values are 1, 3 or 7 days")]
-        public string? NotificationFrequency { get; set; }
+        public byte NotificationFrequency { get; set; }
 
-        [Required]
         public string? PropertyType { get; set; }
 
         [Required]
@@ -35,12 +32,13 @@ namespace Realert.Models
         [Range(0, 20000000)]
         public uint MaxPrice { get; set;}
 
-        [Required]
         [RegularExpression("^$|0|1|2|3|4|5|6|7|8|9|10", ErrorMessage = "Valid values are: ' ' and 0-10")]
         public string? MinBeds { get; set; }
 
-        [Required]
         [RegularExpression("^$|0|1|2|3|4|5|6|7|8|9|10", ErrorMessage = "Valid values are: ' ' and 0-10")]
         public string? MaxBeds { get; set;}
+
+        [Required]
+        public string? SearchLink { get; set; }
     }
 }

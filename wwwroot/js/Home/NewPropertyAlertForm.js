@@ -8,7 +8,8 @@ const propertyLinkErrorText = document.querySelector('#property-link-error');
  * New Property Alert form fields.
  */
 const newPropertyAlertForm = document.querySelector('#new-property-alert-form');
-const targetSiteText = document.querySelector('#target-site');
+const targetSiteText = document.querySelector('#target-site-text');
+const targetSiteInput = document.querySelector('#target-site');
 const propertyTypeInput = document.querySelector('#property-type');
 const locationInput = document.querySelector('#location');
 const locationText = document.querySelector('#location-message');
@@ -17,18 +18,23 @@ const minPriceInput = document.querySelector('#min-price');
 const maxPriceInput = document.querySelector('#max-price');
 const minBedsInput = document.querySelector('#min-beds');
 const maxBedsInput = document.querySelector('#max-beds');
+const searchLinkInput = document.querySelector('#search-link');
 
 /**
- * Supported property site hostnames.
+ * Supported property site hostnames and internal Ids.
  */
 const RIGHTMOVE_HOSTNAME = 'www.rightmove.co.uk';
 const PURPLEBRICKS_HOSTNAME = 'www.purplebricks.co.uk';
+const RIGHTMOVE_ID = 0;
+const PURPLEBRICKS_ID = 1;
+
 
 /**
  * Property search settings. Used to populate default values into the form
  * New Property Alert fields.
  */
 const searchSettings = {
+    targetSiteText: '',
     targetSite: '',
     propertyType: '',
     location: '',
@@ -45,6 +51,7 @@ const searchSettings = {
  * defaults.
  */
 function initializeSearchSettings() {
+    searchSettings.targetSiteText = '';
     searchSettings.targetSite = '';
     searchSettings.propertyType = '';
     searchSettings.location = '';
@@ -73,32 +80,32 @@ function handleSearchLinkForm(e) {
     }
 
     // Attempt to parse the URL. Set an error message if the URL is invalid.
-    let url = "";
     try {
-        url = new URL(propertyLinkInput.value);
+        const url = new URL(propertyLinkInput.value);
+
+        // Parse the URL parameters depending on the property site entered. Give an 
+        // error if the site is not currently suppported.
+        switch (url.hostname) {
+            case RIGHTMOVE_HOSTNAME:
+                parseRightmoveURL(url);
+                break;
+            case PURPLEBRICKS_HOSTNAME:
+                parsePurplebricksURL(url);
+                break;
+            default:
+                newPropertyAlertForm.classList.add('hidden');
+                propertyLinkErrorText.textContent = 'This site is not currently supported. Please enter a Rightmove or Purplebricks link.';
+                return;
+        }
     } catch (error) {
         newPropertyAlertForm.classList.add('hidden');
         propertyLinkErrorText.textContent = 'Please enter a valid URL. Supported sites are: Rightmove and Purplebricks.';
         return;
     }
 
-    // Parse the URL parameters depending on the property site entered. Give an 
-    // error if the site is not currently suppported.
-    switch (url.hostname) {
-        case RIGHTMOVE_HOSTNAME:
-            parseRightmoveURL(url);
-            break;
-        case PURPLEBRICKS_HOSTNAME:
-            parsePurplebricksURL(url);
-            break;
-        default:
-            newPropertyAlertForm.classList.add('hidden');
-            propertyLinkErrorText.textContent = 'This site is not currently supported. Please enter a Rightmove or Purplebricks link.';
-            return;
-    }
-
     // Default in values parsed from the URL.
-    targetSiteText.textContent = searchSettings.targetSite;
+    targetSiteText.textContent = searchSettings.targetSiteText;
+    targetSiteInput.value = searchSettings.targetSite;
     propertyTypeInput.value = searchSettings.propertyType;
     locationInput.value = searchSettings.location;
     locationText.textContent = searchSettings.locationMessage;
@@ -107,6 +114,7 @@ function handleSearchLinkForm(e) {
     maxPriceInput.value = searchSettings.maxPrice;
     minBedsInput.value = searchSettings.minBeds;
     maxBedsInput.value = searchSettings.maxBeds;
+    searchLinkInput.value = propertyLinkInput.value;
 
     // Display the notification setup form.
     newPropertyAlertForm.classList.remove("hidden");
@@ -118,13 +126,21 @@ function handleSearchLinkForm(e) {
  * min beds and max beds values.
  * If the query parameter does not exist then corresponding value in searchSettings
  * will be left as the default.
+ * Throws error if there is no locationIdentifier parameter.
  */
 function parseRightmoveURL(url) {
     initializeSearchSettings();
-    // Location field is formated: 'OUTCODE^XXXX'. Get all characters after the
-    // '^'.
+
+    // Location field is formated: 'OUTCODE^XXXX'. Get all characters after the '^'.
+    // If locationIdentifier field does not exist or is formatted incorrectly, throw an
+    // error as Location cannot be entered later by the user.
     if (url.searchParams.get('locationIdentifier') != null) {
         searchSettings.location = url.searchParams.get('locationIdentifier').split('^')[1];
+        if (searchSettings.location == null) {
+            throw new Error("locationIdentifer invalid");
+        }
+    } else {
+        throw new Error("locationIdentifier missing");
     }
     if (url.searchParams.get('radius') != null) {
         searchSettings.searchRadius = url.searchParams.get('radius');
@@ -144,7 +160,8 @@ function parseRightmoveURL(url) {
     if (url.searchParams.get('maxBedrooms') != null) {
         searchSettings.maxBeds = url.searchParams.get('maxBedrooms');
     }
-    searchSettings.targetSite = 'Rightmove';
+    searchSettings.targetSiteText = 'Rightmove';
+    searchSettings.targetSite = RIGHTMOVE_ID;
 
     // Rightmove uses 4 digit codes in the location parameter. Display a message
     // explaining this.
@@ -160,8 +177,13 @@ function parseRightmoveURL(url) {
  */
 function parsePurplebricksURL(url) {
     initializeSearchSettings();
+
+    // If location field does not exist, throw an error as Location cannot be
+    // entered later by the user.
     if (url.searchParams.get('location') != null) {
         searchSettings.location = url.searchParams.get('location');
+    } else {
+        throw new Error('location missing');
     }
     if (url.searchParams.get('searchRadius') != null) {
         searchSettings.searchRadius = url.searchParams.get('searchRadius');
@@ -195,5 +217,18 @@ function parsePurplebricksURL(url) {
     if (url.searchParams.get('bedroomsTo')) {
         searchSettings.maxBeds = url.searchParams.get('bedroomsTo');
     }
-    searchSettings.targetSite = 'Purplebricks';
+    searchSettings.targetSiteText = 'Purplebricks';
+    searchSettings.targetSite = PURPLEBRICKS_ID;
 }
+
+/**
+ * Add a page load event listener.
+ * If the page is loaded to display validation errors then we want to display
+ * the entire form and populate the search link in the 2nd form.
+ */
+addEventListener('load', () => {
+    if (searchLinkInput.value !== '') {
+        propertyLinkInput.value = searchLinkInput.value;
+        newPropertyAlertForm.classList.remove("hidden");
+    }
+});

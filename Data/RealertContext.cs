@@ -15,5 +15,7 @@ namespace Realert.Data
         }
 
         public DbSet<Realert.Models.PriceAlertNotification> PriceAlertNotification { get; set; } = default!;
+
+        public DbSet<Realert.Models.NewPropertyAlertNotification> NewPropertyAlertNotification { get; set; } = default!;
     }
 }
