@@ -37,16 +37,45 @@ namespace Realert.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Email,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
+        public async Task<IActionResult> Create([Bind("Name,Email,PhoneNumber,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
         {
-            Console.WriteLine("here");
-            if (ModelState.IsValid)
+            Console.WriteLine(priceAlert.NotifyOnPriceIncrease);
+            Console.WriteLine(priceAlert.NotifyOnPropertyDelist);
+            if (!ModelState.IsValid)
             {
-                //_context.Add(priceAlertNotification);
-                //await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
+
+                return View("Index", priceAlert);
             }
-            return View("Index", priceAlert);
+            // Determine target site using the listing link.
+            var url = new Uri(priceAlert.ListingLink!);
+            var targetSiteDictionary = new Dictionary<string, TargetSite> 
+            {
+                {"www.rightmove.co.uk", TargetSite.RIGHTMOVE},
+                {"www.purplebricks.co.uk", TargetSite.PURPLEBRICKS},
+            };
+            // Create new price alert property.
+            // Create new price alert notification.
+            var priceAlertNotification = new PriceAlertNotification
+            {
+                Name = priceAlert.Name,
+                Email = priceAlert.Email,
+                PhoneNumber = priceAlert.PhoneNumber,
+                ListingLink = priceAlert.ListingLink,
+                TargetSite = targetSiteDictionary[url.Host],
+                PriceThreshold = priceAlert.PriceThreshold,
+                NotifyOnPriceIncrease = priceAlert.NotifyOnPriceIncrease,
+                NotifyOnPropertyDelist = priceAlert.NotifyOnPropertyDelist,
+                NotificationType = priceAlert.NotificationType,
+                Note = priceAlert.Note,
+                CreatedAt = DateTime.Today,
+                DeleteCode = "123",
+
+            };
+            _context.Add(priceAlertNotification);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+           
+            //return View("Index", priceAlert);
         }
     
     }

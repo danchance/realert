@@ -27,7 +27,8 @@ namespace Realert.Migrations
                     NotifyOnPropertyDelist = table.Column<bool>(type: "bit", nullable: false),
                     NotificationType = table.Column<int>(type: "int", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    DeleteCode = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -44,6 +45,7 @@ namespace Realert.Migrations
                     FirstScannedPrice = table.Column<int>(type: "int", nullable: false),
                     LastScannedPrice = table.Column<int>(type: "int", nullable: false),
                     NumberOfPriceChanges = table.Column<int>(type: "int", nullable: false),
+                    LastPriceChangeDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PriceAlertNotificationId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

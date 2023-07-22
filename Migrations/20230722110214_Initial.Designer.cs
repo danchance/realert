@@ -12,7 +12,7 @@ using Realert.Data;
 namespace Realert.Migrations
 {
     [DbContext(typeof(RealertContext))]
-    [Migration("20230721185716_Initial")]
+    [Migration("20230722110214_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -35,6 +35,9 @@ namespace Realert.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("DeleteCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -81,6 +84,9 @@ namespace Realert.Migrations
 
                     b.Property<int>("FirstScannedPrice")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("LastPriceChangeDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("LastScannedPrice")
                         .HasColumnType("int");

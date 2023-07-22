@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Realert.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace Realert.Models
 {
@@ -27,6 +28,7 @@ namespace Realert.Models
         public string? Note { get; set; }
         [DataType(DataType.Date)]
         public DateTime CreatedAt { get; set; }
+        public string? DeleteCode { get; set; }
 
         public PriceAlertProperty? Property { get; set; }
     }
