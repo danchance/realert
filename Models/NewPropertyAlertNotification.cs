@@ -8,6 +8,8 @@ namespace Realert.Models
      */
     public class NewPropertyAlertNotification
     {
+        public int Id { get; set; }
+
         [Required]
         [StringLength(100)]
         public string? Email { get; set; }
