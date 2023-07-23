@@ -148,10 +148,12 @@ function parseRightmoveURL(url) {
     if (url.searchParams.get('displayPropertyType') != null) {
         searchSettings.propertyType = url.searchParams.get('displayPropertyType');
     }
-    if (url.searchParams.get('minPrice') != null) {
+    if (url.searchParams.get('minPrice') != null &&
+        url.searchParams.get('minPrice') !== '') {
         searchSettings.minPrice = url.searchParams.get('minPrice');
     }
-    if (url.searchParams.get('maxPrice') != null) {
+    if (url.searchParams.get('maxPrice') != null &&
+        url.searchParams.get('minPrice') !== '') {
         searchSettings.maxPrice = url.searchParams.get('maxPrice');
     }
     if (url.searchParams.get('minBedrooms') != null) {
