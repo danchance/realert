@@ -27,6 +27,23 @@ namespace Realert.Controllers
 
         }
 
+        /*
+         * GET PriceAlertNotification/Property/[id]
+         */
+        public async Task<IActionResult> Property(int? id)
+        {
+            if (id == null || _context.NewPropertyAlertNotification == null)
+            {
+                return NotFound();
+            }
+            var priceAlert = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
+            if (priceAlert == null)
+            {
+                return NotFound();
+            }
+            return View(priceAlert);
+        }
+
         // GET: PriceAlertNotification/Create
         public IActionResult Create()
         {
