@@ -29,6 +29,15 @@ namespace Realert.Models
 
         public string? DeleteCode { get; set; }
 
+        public bool? IsPriceDecrease
+        {
+            get 
+            {
+                return Property == null ? null :  
+                    Property.LastScannedPrice < Property.FirstScannedPrice;
+            }
+        }
+
         public PriceAlertProperty? Property { get; set; }
 
         public string TargetSiteColorClass 

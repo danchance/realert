@@ -36,12 +36,24 @@ namespace Realert.Controllers
             {
                 return NotFound();
             }
-            var priceAlert = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
-            if (priceAlert == null)
+            var priceAlertNotification = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
+            if (priceAlertNotification == null)
             {
                 return NotFound();
             }
-            return View(priceAlert);
+            var editPriceAlertViewModel = new EditPriceAlertViewModel
+            {
+                NotificationType = priceAlertNotification.NotificationType,
+                TargetSite = priceAlertNotification.TargetSite,
+                ListingLink = priceAlertNotification.ListingLink,
+                PriceThreshold = priceAlertNotification.PriceThreshold,
+                NotifyOnPriceIncrease = priceAlertNotification.NotifyOnPriceIncrease,
+                NotifyOnPropertyDelist = priceAlertNotification.NotifyOnPropertyDelist,
+                Note = priceAlertNotification.Note,
+                CreatedAt = priceAlertNotification.CreatedAt,
+                Property = priceAlertNotification.Property,
+            };
+            return View(editPriceAlertViewModel);
         }
 
         // GET: PriceAlertNotification/Create
