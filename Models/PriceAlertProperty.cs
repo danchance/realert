@@ -13,6 +13,6 @@ namespace Realert.Models
         public DateTime LastPriceChangeDate { get; set; }
 
         public int PriceAlertNotificationId { get; set; }
-        public PriceAlertNotification? Notification { get; set; }
+        public virtual PriceAlertNotification? Notification { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Models;
@@ -77,13 +78,15 @@ namespace Realert.Controllers
         /*
          * GET: PriceAlertNotification/Delete/[id]
          */
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? displayError)
         {
             if (id == null || _context.PriceAlertNotification == null)
             {
                 return NotFound();
             }
-            var priceAlertNotification = await _context.PriceAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
+
+            // Get details for the notification and the associated property.
+            var priceAlertNotification = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
                 return NotFound();
@@ -100,6 +103,12 @@ namespace Realert.Controllers
                 CreatedAt = priceAlertNotification.CreatedAt,
                 Property = priceAlertNotification.Property,
             };
+
+            // Display an error message if an unauthorized user tried to delete the notification.
+            if (displayError != null && displayError == true)
+            {
+                ModelState.AddModelError("DeleteCode", "You do not have permission to delete this price alert. Please use the unsubscribe link on an email/text to stop receiving alerts.");
+            }
             return View(editPriceAlertViewModel);
         }
 
@@ -108,7 +117,7 @@ namespace Realert.Controllers
          */
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, [Bind("DeleteCode")] EditPriceAlertViewModel editPriceAlert)
+        public async Task<IActionResult> Delete(int id, [Bind("NotificationType,DeleteCode, TargetSite,CreatedAt,Note")] EditPriceAlertViewModel editPriceAlert)
         {
             if (_context.PriceAlertNotification == null)
             {
@@ -125,9 +134,8 @@ namespace Realert.Controllers
             // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user, 
             // this ensures only the user receiving the emails/texts can delete the alert.
             if (priceAlertNotification.DeleteCode != editPriceAlert.DeleteCode)
-            {
-                ModelState.AddModelError("DeleteCode", "You do not have permission to delete this price alert. Please use the unsubscribe link on an email/text to stop receiving alerts.");
-                return View("Delete", editPriceAlert);
+            {            
+                return RedirectToAction("Delete", new { id, displayError = true });
             }
 
             // Delete the price alert.
