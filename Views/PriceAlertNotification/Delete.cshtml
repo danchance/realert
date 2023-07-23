@@ -1,0 +1,15 @@
+﻿@model Realert.Models.EditPriceAlertViewModel 
+
+@{
+}
+
+<div>
+    <h1>Setup on: @Html.DisplayFor(model => model.CreatedAt)</h1>
+
+    <form asp-controller="PriceAlertNotification" asp-action="Delete">
+        <input asp-for="DeleteCode" id="delete-code" type="text" class="hidden" readonly>
+        <button type="submit" value="Delete">Delete Notification</button>
+        <span asp-validation-for="DeleteCode" class="block mt-2 text-red-500 text-sm"></span>
+    </form>
+</div>
+<script src="~/js/PriceAlertNotification/EditPriceAlert.js" asp-append-version="true"></script>
