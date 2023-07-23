@@ -23,9 +23,9 @@ namespace Realert.Models
             var priceAlert = (PriceAlertSetupViewModel)validationContext.ObjectInstance;
 
             // Validation for the PhoneNumber field.
-            if (_notificationType == Notification.PHONE)
+            if (_notificationType == Notification.Text)
             {
-                if (priceAlert.NotificationType != Notification.PHONE)
+                if (priceAlert.NotificationType != Notification.Text)
                 {
                     return ValidationResult.Success;
                 }
@@ -34,9 +34,9 @@ namespace Realert.Models
             }
 
             // Validation for the Email field.
-            if (_notificationType == Notification.EMAIL)
+            if (_notificationType == Notification.Email)
             {
-                if (priceAlert.NotificationType != Notification.EMAIL)
+                if (priceAlert.NotificationType != Notification.Email)
                 {
                     return ValidationResult.Success;
                 }
@@ -58,11 +58,11 @@ namespace Realert.Models
         [StringLength(100)]
         public string? Name { get; set; }
 
-        [RequiredWhenNotificationType(Notification.EMAIL)]
+        [RequiredWhenNotificationType(Notification.Email)]
         [StringLength(100)]
         public string? Email { get; set; }
 
-        [RequiredWhenNotificationType(Notification.PHONE)]
+        [RequiredWhenNotificationType(Notification.Text)]
         [StringLength(11)]
         public string? PhoneNumber { get; set; }
 

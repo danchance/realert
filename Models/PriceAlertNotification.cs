@@ -4,12 +4,12 @@ namespace Realert.Models
 {
     public enum Notification
     {
-        EMAIL, PHONE
+        Email, Text
     }
 
     public enum TargetSite
     {
-        RIGHTMOVE, PURPLEBRICKS
+        Rightmove, Purplebricks
     }
 
     /*
@@ -81,7 +81,7 @@ namespace Realert.Models
         /*
          * Details about the property such as price history.
          */
-        public PriceAlertProperty? Property { get; set; }
+        public virtual PriceAlertProperty? Property { get; set; }
 
         /*
          * Set values for the CreatedAt timestamp and the DeleteCode.
@@ -131,8 +131,8 @@ namespace Realert.Models
             }
             var targetSiteDictionary = new Dictionary<string, TargetSite>
             {
-                {"www.rightmove.co.uk", TargetSite.RIGHTMOVE},
-                {"www.purplebricks.co.uk", TargetSite.PURPLEBRICKS},
+                {"www.rightmove.co.uk", TargetSite.Rightmove},
+                {"www.purplebricks.co.uk", TargetSite.Purplebricks},
             };
 
             // Exception thrown if host does not exist in dictionary.

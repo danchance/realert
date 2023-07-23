@@ -65,5 +65,77 @@ namespace Realert.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+        /*
+         * GET: NewPropertyAlertNotification/Delete/[id]
+         */
+        public async Task<IActionResult> Delete(int? id, bool? displayError)
+        {
+            if (id == null || _context.NewPropertyAlertNotification == null)
+            {
+                return NotFound();
+            }
+
+            // Get details for the notification and the associated property.
+            var newPropertyAlertNotification = await _context.NewPropertyAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
+            if (newPropertyAlertNotification == null)
+            {
+                return NotFound();
+            }
+
+            var editNewPropertyAlertViewModel = new EditNewPropertyAlertViewModel
+            {
+                NotificationName = newPropertyAlertNotification.NotificationName,
+                NotificationFrequency = newPropertyAlertNotification.NotificationFrequency,
+                TargetSite = newPropertyAlertNotification.TargetSite,
+                PropertyType = newPropertyAlertNotification.PropertyType,
+                Location = newPropertyAlertNotification.Location,
+                SearchRadius = newPropertyAlertNotification.SearchRadius,
+                MinPrice = newPropertyAlertNotification.MinPrice,
+                MaxPrice = newPropertyAlertNotification.MaxPrice,
+                MinBeds = newPropertyAlertNotification.MinBeds,
+                MaxBeds = newPropertyAlertNotification.MaxBeds,
+                CreatedAt = newPropertyAlertNotification.CreatedAt,
+            };
+
+            // Display an error message if an unauthorized user tried to delete the notification.
+            if (displayError != null && displayError == true)
+            {
+                ModelState.AddModelError("DeleteCode", "You do not have permission to delete this property alert. Please use the unsubscribe link on the email to stop receiving alerts.");
+            }
+            return View(editNewPropertyAlertViewModel);
+        }
+
+        /*
+         * POST: NewPropertyAlertNotification/Delete/[id]
+         */
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id, [Bind("DeleteCode")] EditNewPropertyAlertViewModel editNewPropertyAlert)
+        {
+            if (_context.NewPropertyAlertNotification == null)
+            {
+                return Problem("Entity set 'RealertContext.NewPropertyAlertNotification' is null.");
+            }
+
+            // Find the alert with the supplied Id and verify it exists.
+            var newPropertyAlertNotification = await _context.NewPropertyAlertNotification.FindAsync(id);
+            if (newPropertyAlertNotification == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user, 
+            // this ensures only the user receiving the emails can delete the alert.
+            if (newPropertyAlertNotification.DeleteCode != editNewPropertyAlert.DeleteCode)
+            {
+                return RedirectToAction("Delete", new { id, displayError = true });
+            }
+
+            // Delete the price alert.
+            _context.NewPropertyAlertNotification.Remove(newPropertyAlertNotification);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
