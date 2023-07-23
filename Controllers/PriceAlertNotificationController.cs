@@ -117,7 +117,7 @@ namespace Realert.Controllers
          */
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id, [Bind("NotificationType,DeleteCode, TargetSite,CreatedAt,Note")] EditPriceAlertViewModel editPriceAlert)
+        public async Task<IActionResult> Delete(int id, [Bind("DeleteCode")] EditPriceAlertViewModel editPriceAlert)
         {
             if (_context.PriceAlertNotification == null)
             {
