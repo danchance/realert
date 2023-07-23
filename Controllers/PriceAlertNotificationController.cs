@@ -27,6 +27,35 @@ namespace Realert.Controllers
 
         }
 
+        /*
+         * GET PriceAlertNotification/Property/[id]
+         */
+        public async Task<IActionResult> Property(int? id)
+        {
+            if (id == null || _context.NewPropertyAlertNotification == null)
+            {
+                return NotFound();
+            }
+            var priceAlertNotification = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
+            if (priceAlertNotification == null)
+            {
+                return NotFound();
+            }
+            var editPriceAlertViewModel = new EditPriceAlertViewModel
+            {
+                NotificationType = priceAlertNotification.NotificationType,
+                TargetSite = priceAlertNotification.TargetSite,
+                ListingLink = priceAlertNotification.ListingLink,
+                PriceThreshold = priceAlertNotification.PriceThreshold,
+                NotifyOnPriceIncrease = priceAlertNotification.NotifyOnPriceIncrease,
+                NotifyOnPropertyDelist = priceAlertNotification.NotifyOnPropertyDelist,
+                Note = priceAlertNotification.Note,
+                CreatedAt = priceAlertNotification.CreatedAt,
+                Property = priceAlertNotification.Property,
+            };
+            return View(editPriceAlertViewModel);
+        }
+
         // GET: PriceAlertNotification/Create
         public IActionResult Create()
         {
