@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Models;
+using Realert.Services;
 
 namespace Realert.Controllers
 {
@@ -75,7 +76,7 @@ namespace Realert.Controllers
             }
 
             // Create new price alert notification.
-            var priceAlertNotification = new PriceAlertNotification
+            PriceAlertNotification priceAlertNotification = new()
             {
                 Name = priceAlert.Name,
                 Email = priceAlert.Email,
@@ -98,9 +99,16 @@ namespace Realert.Controllers
                 return View("Index", priceAlert);
             }
 
-            // Add new notification to database.
-            _context.Add(priceAlertNotification);
-            await _context.SaveChangesAsync();
+            try
+            {
+                PriceAlertService priceAlertService = new(_context);
+                await priceAlertService.AddPriceAlert(priceAlertNotification);
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            
             return RedirectToAction(nameof(Index));
         }
 
