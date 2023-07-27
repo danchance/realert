@@ -2,5 +2,7 @@
 {
     public class NotificationService
     {
+
+        public NotificationService() { }
     }
 }
