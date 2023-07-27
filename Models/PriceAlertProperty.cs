@@ -14,5 +14,14 @@ namespace Realert.Models
 
         public int PriceAlertNotificationId { get; set; }
         public virtual PriceAlertNotification? Notification { get; set; }
+
+        /*
+         * Set initial values.
+         */
+        public PriceAlertProperty()
+        {
+            NumberOfPriceChanges = 0;
+            LastPriceChangeDate = DateTime.Today;
+        }
     }
 }
