@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using Realert.Models;
+using System.Security.Policy;
 
 namespace Realert.Scrapers
 {
@@ -26,22 +27,15 @@ namespace Realert.Scrapers
         /*
          * Creation method used to create a new NewListingsWebScraper instance.
          */
-        public static async Task<NewListingsWebScraper> InitializeAsync(string initialUrl, TargetSite site)
+        public static async Task<NewListingsWebScraper> InitializeAsync(string url, TargetSite site)
         {
-            int results;
-
-            // Fetch all new properties for the specified site
-            switch (site)
+            // Fetch new property data for the specified site.
+            var results = site switch
             {
-                case TargetSite.Rightmove:
-                    results = await GetRightmoveResults(initialUrl);
-                    break;
-                case TargetSite.Purplebricks:
-                    results = await GetPurplebricksResults(initialUrl);
-                    break;
-                default:
-                    throw new ArgumentException("Site is invalid/not supported.");
-            }
+                TargetSite.Rightmove => await GetRightmoveResults(url),
+                TargetSite.Purplebricks => await GetPurplebricksResults(url),
+                _ => throw new ArgumentException("Site is invalid/not supported."),
+            };
 
             return new NewListingsWebScraper(results);
         }
@@ -49,13 +43,18 @@ namespace Realert.Scrapers
         /*
          * Gets the number of property results that match the search url for Rightmove. 
          */
-        private static async Task<int> GetRightmoveResults(string initialUrl)
+        private static async Task<int> GetRightmoveResults(string url)
         {
             HttpClient client = new();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36");
 
-            // Get the first page of results
-            string page = await client.GetStringAsync(initialUrl);
+            // Get the first page of results.
+            HttpResponseMessage response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ArgumentException("Invalid URL");
+            }
+            string page = await response.Content.ReadAsStringAsync();
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(page);
 
@@ -76,13 +75,18 @@ namespace Realert.Scrapers
         /*
          * Gets the number of property results that match the search url for Purplebricks. 
          */
-        private static async Task<int> GetPurplebricksResults(string initialUrl)
+        private static async Task<int> GetPurplebricksResults(string url)
         {
             HttpClient client = new();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36");
 
-            // Get the first page of results
-            string page = await client.GetStringAsync(initialUrl);
+            // Get the first page of results.
+            HttpResponseMessage response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ArgumentException("Invalid URL");
+            }
+            string page = await response.Content.ReadAsStringAsync();
             HtmlDocument htmlDoc = new();
             htmlDoc.LoadHtml(page);
 

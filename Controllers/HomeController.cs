@@ -14,11 +14,11 @@ namespace Realert.Controllers
             string url3 = "https://www.purplebricks.co.uk/search/property-for-sale/telford?page=1&sortBy=2&location=tf2&searchRadius=10&searchType=ForSale&soldOrLet=false&latitude=52.7102563&longitude=-2.419879&betasearch=true";
             try
             {
-                /*PropertyListingWebScraper propertyScraper = await PropertyListingWebScraper.InitializeAsync(url, TargetSite.Purplebricks);
+                PropertyListingWebScraper propertyScraper = await PropertyListingWebScraper.InitializeAsync(url, TargetSite.Purplebricks);
                 Console.WriteLine(propertyScraper.PropertyName);
-                Console.WriteLine(propertyScraper.PropertyPrice);*/
-                NewListingsWebScraper scraper = await NewListingsWebScraper.InitializeAsync(url3, TargetSite.Purplebricks);
-                Console.WriteLine(scraper.ResultCount);
+                Console.WriteLine(propertyScraper.PropertyPrice);
+                //NewListingsWebScraper scraper = await NewListingsWebScraper.InitializeAsync(url3, TargetSite.Purplebricks);
+                //Console.WriteLine(scraper.ResultCount);
 
 
             } catch (Exception ex)

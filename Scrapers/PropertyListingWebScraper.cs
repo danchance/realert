@@ -50,9 +50,14 @@ namespace Realert.Scrapers
             // Request data from the specified url.
             HttpClient client = new();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36");
-            string response = await client.GetStringAsync(url);
+            HttpResponseMessage response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new ArgumentException("Invalid URL");
+            }
+            string page = await response.Content.ReadAsStringAsync();
 
-            return new PropertyListingWebScraper(response, site);
+            return new PropertyListingWebScraper(page, site);
         }
 
         /*
