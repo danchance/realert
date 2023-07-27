@@ -16,7 +16,7 @@ namespace Realert.Scrapers
          * Property data.
          */
         public string? PropertyName { get; private set; }
-        public string? PropertyPrice { get; private set; }
+        public int PropertyPrice { get; private set; }
 
         /*
          * Private constructor. 
@@ -61,8 +61,8 @@ namespace Realert.Scrapers
         }
 
         /*
-         * Parses the HTML of a Rightmove property listing page, to extract
-         * the property name and price.
+         * Parses the HTML of a Rightmove property listing page, to extract the
+         * property name and price.
          */
         private void ParseRightmoveData(string html)
         {
@@ -77,21 +77,38 @@ namespace Realert.Scrapers
             var propertyNameNode = htmlDoc.DocumentNode.SelectSingleNode(propertyNameElement);
             PropertyName = propertyNameNode.InnerText;
 
-            // Property Price.
+            // Property Price, throw an error if its not numeric.
             var propertyPriceNode = htmlDoc.DocumentNode.SelectSingleNode(propertyPriceElement);
-            PropertyPrice = propertyPriceNode.GetAttributeValue("value", "");
+            if (int.TryParse(propertyPriceNode.GetAttributeValue("value", ""), out int propertyPrice)) 
+            {
+                PropertyPrice = propertyPrice;
+            } 
+            else
+            {
+                throw new ArgumentException("Cannot find price for this property");
+            }
         }
 
         /*
-         * Parses the JSON of a Purplebricks property listing, to extract
-         * the property name and price.
+         * Parses the JSON of a Purplebricks property listing, to extract the
+         * property name and price.
          */
         private void ParsePurplebricksData(string json)
         {
-            // Parse the json string and extract the property name and price.
             JToken token = JObject.Parse(json);
+
+            // Property Name.
             PropertyName = (string?)token.SelectToken("address");
-            PropertyPrice = (string?)token.SelectToken("marketPrice");
+
+            // Property Price, throw an error if its not numeric.
+            if (int.TryParse((string?)token.SelectToken("marketPrice"), out int propertyPrice))
+            {
+                PropertyPrice = propertyPrice;
+            }
+            else
+            {
+                throw new ArgumentException("Cannot find price for this property");
+            }
         }
     }
 }
