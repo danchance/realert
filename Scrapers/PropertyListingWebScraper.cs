@@ -79,7 +79,8 @@ namespace Realert.Scrapers
 
             // Property Price, throw an error if its not numeric.
             var propertyPriceNode = htmlDoc.DocumentNode.SelectSingleNode(propertyPriceElement);
-            if (int.TryParse(propertyPriceNode.GetAttributeValue("value", ""), out int propertyPrice)) 
+            string price = propertyPriceNode.GetAttributeValue("value", "").Replace(",", "");
+            if (int.TryParse(price, out int propertyPrice)) 
             {
                 PropertyPrice = propertyPrice;
             } 
