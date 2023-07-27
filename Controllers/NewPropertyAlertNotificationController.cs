@@ -7,16 +7,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Models;
+using Realert.Services;
 
 namespace Realert.Controllers
 {
     public class NewPropertyAlertNotificationController : Controller
     {
         private readonly RealertContext _context;
+        private readonly NewPropertyAlertService _alertService;
 
         public NewPropertyAlertNotificationController(RealertContext context)
         {
             _context = context;
+            _alertService = new(context);
         }
 
         // GET: NewPropertyAlertNotification
@@ -61,8 +64,15 @@ namespace Realert.Controllers
             };
 
             // Add new notification to the database.
-            _context.Add(newPropertyAlertNotification);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _alertService.AddNewPropertyAlert(newPropertyAlertNotification);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -133,8 +143,8 @@ namespace Realert.Controllers
             }
 
             // Delete the price alert.
-            _context.NewPropertyAlertNotification.Remove(newPropertyAlertNotification);
-            await _context.SaveChangesAsync();
+            await _alertService.DeleteNewPropertyAlert(newPropertyAlertNotification);
+
             return RedirectToAction(nameof(Index));
         }
     }

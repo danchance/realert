@@ -85,5 +85,71 @@ namespace Realert.Models
 
             return new string(stringChars);
         }
+
+        /*
+         * Get the url used to search for new properties.
+         */
+        public string GetUrl()
+        {
+            switch (TargetSite)
+            {
+                case TargetSite.Rightmove:
+                    return BuildRightmoveUrl();
+                case TargetSite.Purplebricks:
+                    return BuildPurplebricksUrl();
+            }
+
+            return "";
+        }
+
+        /*
+         * Build new property search url for Rightmove.
+         */
+        private string BuildRightmoveUrl()
+        {
+            UriBuilder baseUri = new("https://www.rightmove.co.uk/property-for-sale/find.html?searchType=SALE");
+
+            // Build query string.
+            string query = $"locationIdentifier=OUTCODE%5E{Location}&radius={SearchRadius}&minBedrooms={MinBeds}&maxBedrooms={MaxBeds}&displayPropertyType={PropertyType}";
+
+            // If MinPrice or MaxPrice are 0, this means the user entered no value, i.e. no price
+            // limit, so don't add a price query.
+            if(MinPrice != 0)
+            {
+                query += $"&minPrice={MinPrice}";
+            }
+            if (MaxPrice != 0)
+            {
+                query += $"&maxPrice={MaxPrice}";
+            }
+            baseUri.Query += "&" + query ;
+
+            return baseUri.ToString();
+        }
+
+        /*
+         * Build new property serach url for Purplebricks.
+         */
+        private string BuildPurplebricksUrl()
+        {
+            UriBuilder baseUri = new("https://www.purplebricks.co.uk/search/property-for-sale/");
+
+            // Build query string.
+            string query = $"location={Location}&searchRadius={SearchRadius}&bedroomsFrom={MinBeds}&bedroomsTo={MaxBeds}";
+
+            // If MinPrice or MaxPrice are 0, this means the user entered no value, i.e. no price
+            // limit, so don't add a price query.
+            if (MinPrice != 0)
+            {
+                query += $"&priceFrom={MinPrice}";
+            }
+            if (MaxPrice != 0)
+            {
+                query += $"&priceTo={MaxPrice}";
+            }
+            baseUri.Query += "&" + query ;
+
+            return baseUri.ToString();
+        }
     }
 }
