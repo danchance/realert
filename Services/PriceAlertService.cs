@@ -135,7 +135,7 @@ namespace Realert.Services
             {
                 var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Price Change";
-                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href={priceAlert.ListingLink}>{property.PropertyName}</a> has dropped in price.<br><br>Original Price: £{property.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href=\"https://localhost:7231/PriceAlertNotification/Property/{priceAlert.Id}\">{property.PropertyName}</a> has dropped in price.<br><br>Original Price: £{property.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
 
                 var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject); 
 
