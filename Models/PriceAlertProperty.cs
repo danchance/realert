@@ -29,10 +29,11 @@ namespace Realert.Models
             set 
             {
                 LastPriceChangeDate = DateTime.Today;
-                if (_lastScannedPrice != FirstScannedPrice) 
+                if (value != FirstScannedPrice) 
                 {
                     NumberOfPriceChanges++;
                 }
+                _lastScannedPrice = value;
             }
         }
 
