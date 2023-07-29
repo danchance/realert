@@ -7,6 +7,7 @@ namespace Realert.Services
     {
 
         private readonly IAmazonSimpleEmailService _amazonSimpleEmailService;
+        private const string _senderAddress = "dan.chance@outlook.com";
 
         public EmailService(IAmazonSimpleEmailService amazonSimpleEmailService) 
         {
@@ -14,9 +15,9 @@ namespace Realert.Services
         }
 
         /*
-         * 
+         * Uses AWS SES to send an email.
          */
-        public async Task<string> SendEmailAsync(List<string> toAdress, string bodyText, string subject, string senderAddress)
+        public async Task<string> SendEmailAsync(List<string> toAddress, string bodyHtml, string subject)
         {
             var messageId = "";
             try
@@ -26,21 +27,16 @@ namespace Realert.Services
                     {
                         Destination = new Destination
                         {
-                            ToAddresses = toAdress,
+                            ToAddresses = toAddress,
                         },
                         Message = new Message
                         {
                             Body = new Body
                             {
-                                /*Html = new Content
+                                Html = new Content
                                 {
                                     Charset = "UTF-8",
                                     Data = bodyHtml
-                                },*/
-                                Text = new Content
-                                {
-                                    Charset = "UTF-8",
-                                    Data = bodyText
                                 }
                             },
                             Subject = new Content
@@ -49,7 +45,7 @@ namespace Realert.Services
                                 Data = subject
                             }
                         },
-                        Source = senderAddress
+                        Source = _senderAddress
                     }); 
                 messageId = response.MessageId;
             }

@@ -1,4 +1,5 @@
-﻿using Realert.Data;
+﻿using Amazon.SimpleEmail;
+using Realert.Data;
 using Realert.Models;
 using Realert.Scrapers;
 
@@ -7,11 +8,17 @@ namespace Realert.Services
     public sealed class PriceAlertService
     {
         private readonly RealertContext _context;
+        private readonly EmailService _emailService;
+
         //private readonly ILogger<PriceAlertService> _logger;
 
         public PriceAlertService(RealertContext context)
         {
             _context = context;
+
+            var host = Host.CreateDefaultBuilder().ConfigureServices((_, services) => services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>()).Build();
+            _emailService = host.Services.GetRequiredService<EmailService>();
+
             //_logger = logger;
         }
 
@@ -36,7 +43,8 @@ namespace Realert.Services
         }
 
         /*
-         * Delete a price alert and the linked property.
+         * Used to delete a price alert and the linked property and, if the user has delist alerts on,
+         * send a notification to inform them.
          */
         public async Task DeletePriceAlert(PriceAlertNotification priceAlert, bool isDelist = false)
         {
@@ -46,7 +54,7 @@ namespace Realert.Services
             // If the property was delisted and user has delist alerts on, send notification.
             if (isDelist && priceAlert.NotifyOnPropertyDelist)
             {
-                // Notify user
+                await SendDelistAlert(priceAlert, priceAlert.Property!);
             }
         }
 
@@ -103,22 +111,63 @@ namespace Realert.Services
                 return;
             }
 
-            // If price has decreased, send notifcation.
-            if (priceDifference < 0)
+            // If price has decreased always send notifcation.
+            // If price has increased, check if user wants to receive price alerts.
+            if (priceDifference < 0 || priceAlert.NotifyOnPriceIncrease)
             {
-                // Send notification
-            }
-
-            // Price increase, check if user wants to receive price increase alerts.
-            if (priceAlert.NotifyOnPriceIncrease)
-            {
-
+                await SendPriceAlert(priceAlert, property, propertyScraper.PropertyPrice);
             }
 
             // Update property with the latest price data.
             property.LastScannedPrice = propertyScraper.PropertyPrice;
             _context.Update(property);
             await _context.SaveChangesAsync();
+        }
+
+        /*
+         * Used to send an email or text notification to the user to notify them that the property
+         * price has increased/decreased.
+         */
+        public async Task SendPriceAlert(PriceAlertNotification priceAlert, PriceAlertProperty property, int newPrice)
+        {
+            // Send an email notification.
+            if (priceAlert.NotificationType == Notification.Email)
+            {
+                var toAddresses = new List<string> { priceAlert.Email! };
+                var subject = $"Realert - Price Change";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href={priceAlert.ListingLink}>{property.PropertyName}</a> has dropped in price.<br><br>Original Price: £{property.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
+
+                var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject); 
+
+                Console.WriteLine(messageId);
+                return;
+            }
+
+            // Send a text notification.
+            // TODO: Use AWS SNS to send text message.
+        }
+
+        /*
+         * Used to send an email or text notification to the user to notify them that the property has
+         * been delisted.
+         */
+        private async Task SendDelistAlert(PriceAlertNotification priceAlert, PriceAlertProperty property)
+        {
+            // Send an email notification.
+            if (priceAlert.NotificationType == Notification.Email) 
+            {
+                var toAddresses = new List<string> { priceAlert.Email };
+                var subject = $"Realert - Property Delisted";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{property.PropertyName}</a> has been delisted and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert ";
+
+                var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
+
+                Console.WriteLine(messageId);
+                return;
+            }
+
+            // Send a text notification.
+            // TODO: Use AWS SNS to send text message.
         }
 
     }
