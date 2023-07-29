@@ -24,11 +24,11 @@ namespace Realert.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var priceAlert = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == 34);
+            var priceAlert = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == 39);
 
             PriceAlertService priceAlertService = new(_context);
             //var msgId = await priceAlertService.SendPriceAlert(priceAlert, priceAlert.Property, 500000);
-            //await priceAlertService.SendDelistAlert(priceAlert, priceAlert.Property);
+            await priceAlertService.ScanProperty(priceAlert);
 
 
             //Console.WriteLine(msgId);

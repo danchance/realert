@@ -156,7 +156,7 @@ namespace Realert.Services
             // Send an email notification.
             if (priceAlert.NotificationType == Notification.Email) 
             {
-                var toAddresses = new List<string> { priceAlert.Email };
+                var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Property Delisted";
                 var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{property.PropertyName}</a> has been delisted and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert ";
 
