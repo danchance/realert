@@ -48,16 +48,10 @@ namespace Realert.Services
          * Used to delete a price alert and the linked property and, if the user has delist alerts on,
          * send a notification to inform them.
          */
-        public async Task DeleteAlertAsync(PriceAlertNotification priceAlert, bool isDelist = false)
+        public async Task DeleteAlertAsync(PriceAlertNotification priceAlert)
         {
             _context.Remove(priceAlert);
             await _context.SaveChangesAsync();
-
-            // If the property was delisted and user has delist alerts on, send notification.
-            if (isDelist && priceAlert.NotifyOnPropertyDelist)
-            {
-                await SendDelistAlertAsync(priceAlert);
-            }
         }
 
         /*
@@ -106,7 +100,13 @@ namespace Realert.Services
             catch (Exception)
             {
                 // Property does not exist, delete the nofication.
-                await DeleteAlertAsync(priceAlert, true);
+                await DeleteAlertAsync(priceAlert);
+
+                // If the user has delist alerts on, send notification.
+                if (priceAlert.NotifyOnPropertyDelist)
+                {
+                    await SendDelistAlertAsync(priceAlert);
+                }
                 return;
             }
 
