@@ -24,7 +24,10 @@ namespace Realert.Models
         /*
          * How frequently a scan will occur to check for new properties.
          */
+        [RegularExpression("1|3|7")]
         public byte NotificationFrequency { get; set; }
+        [DataType(DataType.Date)]
+        public DateTime? LastScannedDate { get; set; }
 
         /*
          * The site to search for properties on

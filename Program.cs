@@ -1,14 +1,30 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Amazon.SimpleEmail;
+using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Realert.Data;
+using Realert.Interfaces;
+using Realert.Models;
+using Realert.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddDbContext<RealertContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RealertContext") ?? throw new InvalidOperationException("Connection string 'RealertContext' not found.")));
 
-// Add services to the container.
+builder.Services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>();
+
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IPriceAlertService, PriceAlertService>();
+
+builder.Services.AddScoped<INewPropertyAlertService, NewPropertyAlertService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddHostedService<JobService>();
 
 var app = builder.Build();
 

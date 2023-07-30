@@ -14,12 +14,12 @@ namespace Realert.Controllers
     public class NewPropertyAlertNotificationController : Controller
     {
         private readonly RealertContext _context;
-        private readonly NewPropertyAlertService _alertService;
+        private readonly INewPropertyAlertService _newPropertyAlertService;
 
-        public NewPropertyAlertNotificationController(RealertContext context)
+        public NewPropertyAlertNotificationController(RealertContext context, INewPropertyAlertService newPropertyAlertService)
         {
             _context = context;
-            _alertService = new(context);
+            _newPropertyAlertService = newPropertyAlertService;
         }
 
         // GET: NewPropertyAlertNotification
@@ -66,7 +66,7 @@ namespace Realert.Controllers
             // Add new notification to the database.
             try
             {
-                await _alertService.AddNewPropertyAlert(newPropertyAlertNotification);
+                await _newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
             }
             catch (Exception ex) 
             {
@@ -143,7 +143,7 @@ namespace Realert.Controllers
             }
 
             // Delete the price alert.
-            await _alertService.DeleteNewPropertyAlert(newPropertyAlertNotification);
+            await _newPropertyAlertService.DeleteAlertAsync(newPropertyAlertNotification);
 
             return RedirectToAction(nameof(Index));
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Realert.Data;
 
@@ -11,9 +12,11 @@ using Realert.Data;
 namespace Realert.Migrations
 {
     [DbContext(typeof(RealertContext))]
-    partial class RealertContextModelSnapshot : ModelSnapshot
+    [Migration("20230730104459_LastScannedDate")]
+    partial class LastScannedDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,31 +24,6 @@ namespace Realert.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Realert.Models.Job", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRunning")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("LastRun")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Job");
-                });
 
             modelBuilder.Entity("Realert.Models.NewPropertyAlertNotification", b =>
                 {
@@ -67,7 +45,7 @@ namespace Realert.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("LastScannedDate")
+                    b.Property<DateTime>("LastScannedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Location")

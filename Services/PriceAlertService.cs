@@ -1,23 +1,25 @@
 ﻿using Amazon.SimpleEmail;
+using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Models;
 using Realert.Scrapers;
+using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public sealed class PriceAlertService
+    public interface IPriceAlertService : IAlertService<PriceAlertNotification> { }
+
+    public sealed class PriceAlertService : IPriceAlertService
     {
         private readonly RealertContext _context;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
         //private readonly ILogger<PriceAlertService> _logger;
 
-        public PriceAlertService(RealertContext context)
+        public PriceAlertService(RealertContext context, IEmailService emailService)
         {
             _context = context;
-
-            var host = Host.CreateDefaultBuilder().ConfigureServices((_, services) => services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>()).Build();
-            _emailService = host.Services.GetRequiredService<EmailService>();
+            _emailService = emailService;
 
             //_logger = logger;
         }
@@ -25,7 +27,7 @@ namespace Realert.Services
         /*
          * Performs intial setup for adding a property price alert.
          */
-        public async Task AddPriceAlert(PriceAlertNotification priceAlert)
+        public async Task AddAlertAsync(PriceAlertNotification priceAlert)
         {
             // Fetch details of the property.
             // Note: Do this before adding the alert as this will also validate if the
@@ -46,16 +48,10 @@ namespace Realert.Services
          * Used to delete a price alert and the linked property and, if the user has delist alerts on,
          * send a notification to inform them.
          */
-        public async Task DeletePriceAlert(PriceAlertNotification priceAlert, bool isDelist = false)
+        public async Task DeleteAlertAsync(PriceAlertNotification priceAlert)
         {
             _context.Remove(priceAlert);
             await _context.SaveChangesAsync();
-
-            // If the property was delisted and user has delist alerts on, send notification.
-            if (isDelist && priceAlert.NotifyOnPropertyDelist)
-            {
-                await SendDelistAlert(priceAlert, priceAlert.Property!);
-            }
         }
 
         /*
@@ -76,10 +72,24 @@ namespace Realert.Services
         }
 
         /*
+         * Checks all Price Alerts setup for a change in price in the property. If the price
+         * has changed a notification is sent to the user.
+         */
+        public async Task PerformScanAsync()
+        {
+            var priceAlerts = _context.PriceAlertNotification.Include("Property").ToList();
+
+            for (int i = 0; i < priceAlerts.Count; i++)
+            {
+                await ScanPropertyAsync(priceAlerts[i]);
+            }
+        }
+
+        /*
          * Scan property to get its current price, if the price has changed from the 
          * last scan, notify the user.
          */
-        public async Task ScanProperty(PriceAlertNotification priceAlert)
+        private async Task ScanPropertyAsync(PriceAlertNotification priceAlert)
         {
             PropertyListingWebScraper propertyScraper;
             try
@@ -90,7 +100,13 @@ namespace Realert.Services
             catch (Exception)
             {
                 // Property does not exist, delete the nofication.
-                await DeletePriceAlert(priceAlert, true);
+                await DeleteAlertAsync(priceAlert);
+
+                // If the user has delist alerts on, send notification.
+                if (priceAlert.NotifyOnPropertyDelist)
+                {
+                    await SendDelistAlertAsync(priceAlert);
+                }
                 return;
             }
 
@@ -115,7 +131,7 @@ namespace Realert.Services
             // If price has increased, check if user wants to receive price alerts.
             if (priceDifference < 0 || priceAlert.NotifyOnPriceIncrease)
             {
-                await SendPriceAlert(priceAlert, property, propertyScraper.PropertyPrice);
+                await SendAlertAsync(priceAlert, propertyScraper.PropertyPrice);
             }
 
             // Update property with the latest price data.
@@ -128,14 +144,14 @@ namespace Realert.Services
          * Used to send an email or text notification to the user to notify them that the property
          * price has increased/decreased.
          */
-        public async Task SendPriceAlert(PriceAlertNotification priceAlert, PriceAlertProperty property, int newPrice)
+        private async Task SendAlertAsync(PriceAlertNotification priceAlert, int newPrice)
         {
             // Send an email notification.
             if (priceAlert.NotificationType == Notification.Email)
             {
                 var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Price Change";
-                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href=\"https://localhost:7231/PriceAlertNotification/Property/{priceAlert.Id}\">{property.PropertyName}</a> has dropped in price.<br><br>Original Price: £{property.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href=\"https://localhost:7231/PriceAlertNotification/Property/{priceAlert.Id}\">{priceAlert.Property!.PropertyName}</a> has dropped in price.<br><br>Original Price: £{priceAlert.Property!.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
 
                 var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject); 
 
@@ -151,14 +167,14 @@ namespace Realert.Services
          * Used to send an email or text notification to the user to notify them that the property has
          * been delisted.
          */
-        private async Task SendDelistAlert(PriceAlertNotification priceAlert, PriceAlertProperty property)
+        private async Task SendDelistAlertAsync(PriceAlertNotification priceAlert)
         {
             // Send an email notification.
             if (priceAlert.NotificationType == Notification.Email) 
             {
                 var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Property Delisted";
-                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{property.PropertyName}</a> has been delisted and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert ";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{priceAlert.Property!.PropertyName}</a> has been delisted and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert ";
 
                 var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
 
@@ -169,6 +185,5 @@ namespace Realert.Services
             // Send a text notification.
             // TODO: Use AWS SNS to send text message.
         }
-
     }
 }

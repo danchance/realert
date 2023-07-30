@@ -15,10 +15,12 @@ namespace Realert.Controllers
     public class PriceAlertNotificationController : Controller
     {
         private readonly RealertContext _context;
+        private readonly IPriceAlertService _priceAlertService;
 
-        public PriceAlertNotificationController(RealertContext context)
+        public PriceAlertNotificationController(RealertContext context, IPriceAlertService priceAlertService)
         {
             _context = context;
+            _priceAlertService = priceAlertService;
         }
 
         // GET: PriceAlertNotification
@@ -101,14 +103,12 @@ namespace Realert.Controllers
 
             try
             {
-                PriceAlertService priceAlertService = new(_context);
-                await priceAlertService.AddPriceAlert(priceAlertNotification);
+                await _priceAlertService.AddAlertAsync(priceAlertNotification);
             } catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            
             return RedirectToAction(nameof(Index));
         }
 
@@ -146,6 +146,7 @@ namespace Realert.Controllers
             {
                 ModelState.AddModelError("DeleteCode", "You do not have permission to delete this price alert. Please use the unsubscribe link on an email/text to stop receiving alerts.");
             }
+
             return View(editPriceAlertViewModel);
         }
 
@@ -176,8 +177,8 @@ namespace Realert.Controllers
             }
 
             // Delete the price alert.
-            _context.PriceAlertNotification.Remove(priceAlertNotification);
-            await _context.SaveChangesAsync();
+            await _priceAlertService.DeleteAlertAsync(priceAlertNotification);
+
             return RedirectToAction(nameof(Index));
         }
     }

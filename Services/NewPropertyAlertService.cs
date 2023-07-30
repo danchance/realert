@@ -2,26 +2,27 @@
 using Realert.Data;
 using Realert.Models;
 using Realert.Scrapers;
+using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class NewPropertyAlertService
+    public interface INewPropertyAlertService : IAlertService<NewPropertyAlertNotification> {}
+
+    public class NewPropertyAlertService : INewPropertyAlertService
     {
         private readonly RealertContext _context;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
-        public NewPropertyAlertService(RealertContext context)
+        public NewPropertyAlertService(RealertContext context, IEmailService emailService)
         {
             _context = context;
-
-            var host = Host.CreateDefaultBuilder().ConfigureServices((_, services) => services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>()).Build();
-            _emailService = host.Services.GetRequiredService<EmailService>();
+            _emailService = emailService;
         }
 
         /*
          * Add a New Property Alert.
          */
-        public async Task AddNewPropertyAlert(NewPropertyAlertNotification newPropertyAlert)
+        public async Task AddAlertAsync(NewPropertyAlertNotification newPropertyAlert)
         {
             _context.Add(newPropertyAlert);
             await _context.SaveChangesAsync();
@@ -30,17 +31,46 @@ namespace Realert.Services
         /*
          * Delete a New Property Alert.
          */
-        public async Task DeleteNewPropertyAlert(NewPropertyAlertNotification newPropertyAlert)
+        public async Task DeleteAlertAsync(NewPropertyAlertNotification newPropertyAlert)
         {
             _context.Remove(newPropertyAlert);
             await _context.SaveChangesAsync();
         }
 
         /*
+         * Checks all New Property Alerts setup for any new properties listed. 
+         * If new property listings are found a notification is sent to the user.
+         */
+        public async Task PerformScanAsync()
+        {
+            var newPropertyAlerts = _context.NewPropertyAlertNotification.ToList();
+
+            for (int i = 0; i < newPropertyAlerts.Count; i++)
+            {
+                NewPropertyAlertNotification newPropertyAlert = newPropertyAlerts[i];
+
+                // If no scan has been performed before, carry out the first scan
+                if (newPropertyAlert.LastScannedDate == null)
+                {
+                    await ScanNewPropertiesAsync(newPropertyAlert);
+                    continue;
+                }
+
+                // Scan has already been performed, check if enough time has elapsed 
+                // since the last scan.
+                int daysSinceLastScan = (DateTime.Today - (DateTime)newPropertyAlert.LastScannedDate!).Days;
+                if (daysSinceLastScan >= newPropertyAlert.NotificationFrequency) 
+                {
+                    await ScanNewPropertiesAsync(newPropertyAlert);
+                }
+            }
+        }
+
+        /*
          * Scans for new properties that match the search query, and notifies the user if
          * it finds any.
          */
-        public async Task ScanNewProperties(NewPropertyAlertNotification newPropertyAlert)
+        private async Task ScanNewPropertiesAsync(NewPropertyAlertNotification newPropertyAlert)
         {
             string url = newPropertyAlert.GetUrl();
 
@@ -50,8 +80,9 @@ namespace Realert.Services
             {
                 propertyScraper = await NewListingsWebScraper.InitializeAsync(url, newPropertyAlert.TargetSite);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine(ex.Message); 
                 return;
             }
 
@@ -62,13 +93,18 @@ namespace Realert.Services
             }
 
             // Results found, send a notfication the to user.
-            await SendNewPropertyAlert(newPropertyAlert, propertyScraper.ResultCount, url);
+            await SendAlertAsync(newPropertyAlert, propertyScraper.ResultCount, url);
+
+            // Only update last scanned date if a notification was sent to the user.
+            newPropertyAlert.LastScannedDate = DateTime.Today;
+            _context.Update(newPropertyAlert);
+            await _context.SaveChangesAsync();
         }
 
         /*
          * Used to send an email notification when new property listings are found.
          */
-        private async Task SendNewPropertyAlert(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
+        private async Task SendAlertAsync(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
         {
             var toAddresses = new List<string> { newPropertyAlert.Email! };
             var subject = $"Realert - New Properties Found";
