@@ -1,5 +1,6 @@
 ﻿using HtmlAgilityPack;
 using Newtonsoft.Json.Linq;
+using Realert.Interfaces;
 using Realert.Models;
 
 namespace Realert.Scrapers
@@ -9,7 +10,7 @@ namespace Realert.Scrapers
      * web pages.
      * Currently supports: Rightmove and Purplebricks.
      */
-    public class PropertyListingWebScraper
+    public class PropertyListingWebScraper : IWebScraper<PropertyListingWebScraper>
     {
 
         /*

@@ -3,7 +3,6 @@ using Realert.Data;
 using Realert.Models;
 using Realert.Scrapers;
 using Realert.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace Realert.Services
 {
@@ -94,7 +93,7 @@ namespace Realert.Services
             }
 
             // Results found, send a notfication the to user.
-            await SendNewPropertyAlert(newPropertyAlert, propertyScraper.ResultCount, url);
+            await SendAlertAsync(newPropertyAlert, propertyScraper.ResultCount, url);
 
             // Only update last scanned date if a notification was sent to the user.
             newPropertyAlert.LastScannedDate = DateTime.Today;
@@ -105,7 +104,7 @@ namespace Realert.Services
         /*
          * Used to send an email notification when new property listings are found.
          */
-        private async Task SendNewPropertyAlert(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
+        private async Task SendAlertAsync(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
         {
             var toAddresses = new List<string> { newPropertyAlert.Email! };
             var subject = $"Realert - New Properties Found";

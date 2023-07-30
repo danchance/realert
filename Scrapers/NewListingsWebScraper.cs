@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using Realert.Interfaces;
 using Realert.Models;
 using System.Security.Policy;
 
@@ -8,7 +9,7 @@ namespace Realert.Scrapers
      * Scrapes new property listings from real estate web pages.
      * Currently supports: Rightmove and Purplebricks
      */
-    public class NewListingsWebScraper
+    public class NewListingsWebScraper : IWebScraper<NewListingsWebScraper>
     {
         /*
          * Number of results found.
