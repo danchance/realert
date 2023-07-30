@@ -6,7 +6,9 @@ using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class NewPropertyAlertService : IAlertService<NewPropertyAlertNotification>
+    public interface INewPropertyAlertService : IAlertService<NewPropertyAlertNotification> {}
+
+    public class NewPropertyAlertService : INewPropertyAlertService
     {
         private readonly RealertContext _context;
         private readonly EmailService _emailService;

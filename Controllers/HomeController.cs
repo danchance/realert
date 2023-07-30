@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
+using Realert.Interfaces;
 using Realert.Models;
 using Realert.Services;
 
@@ -16,9 +17,11 @@ namespace Realert.Controllers
     {
 
         private readonly RealertContext _context;
+        private readonly INewPropertyAlertService _newPropertyAlertService;
 
-        public HomeController(RealertContext context)
+        public HomeController(RealertContext context, INewPropertyAlertService context2)
         {
+            _newPropertyAlertService = context2;
             _context = context;
         }
 
@@ -30,8 +33,8 @@ namespace Realert.Controllers
             //var msgId = await priceAlertService.SendPriceAlert(priceAlert, priceAlert.Property, 500000);
             // await priceAlertService.PerformScanAsync();
 
-            NewPropertyAlertService npas = new(_context);
-            await npas.PerformScanAsync();
+            //NewPropertyAlertService npas = new NewPropertyAlertService();
+            await _newPropertyAlertService.PerformScanAsync();
 
 
             //Console.WriteLine(msgId);

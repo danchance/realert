@@ -7,7 +7,9 @@ using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public sealed class PriceAlertService : IAlertService<PriceAlertNotification>
+    public interface IPriceAlertService : IAlertService<PriceAlertNotification> { }
+
+    public sealed class PriceAlertService : IPriceAlertService
     {
         private readonly RealertContext _context;
         private readonly EmailService _emailService;
