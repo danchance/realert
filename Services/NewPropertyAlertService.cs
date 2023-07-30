@@ -11,14 +11,12 @@ namespace Realert.Services
     public class NewPropertyAlertService : INewPropertyAlertService
     {
         private readonly RealertContext _context;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
-        public NewPropertyAlertService(RealertContext context)
+        public NewPropertyAlertService(RealertContext context, IEmailService emailService)
         {
             _context = context;
-
-            var host = Host.CreateDefaultBuilder().ConfigureServices((_, services) => services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>()).Build();
-            _emailService = host.Services.GetRequiredService<EmailService>();
+            _emailService = emailService;
         }
 
         /*

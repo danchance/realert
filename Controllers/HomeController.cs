@@ -17,11 +17,11 @@ namespace Realert.Controllers
     {
 
         private readonly RealertContext _context;
-        private readonly INewPropertyAlertService _newPropertyAlertService;
+        private readonly INewPropertyAlertService _service;
 
-        public HomeController(RealertContext context, INewPropertyAlertService context2)
+        public HomeController(RealertContext context, INewPropertyAlertService service)
         {
-            _newPropertyAlertService = context2;
+            _service = service;
             _context = context;
         }
 
@@ -33,8 +33,7 @@ namespace Realert.Controllers
             //var msgId = await priceAlertService.SendPriceAlert(priceAlert, priceAlert.Property, 500000);
             // await priceAlertService.PerformScanAsync();
 
-            //NewPropertyAlertService npas = new NewPropertyAlertService();
-            await _newPropertyAlertService.PerformScanAsync();
+            await _service.PerformScanAsync();
 
 
             //Console.WriteLine(msgId);

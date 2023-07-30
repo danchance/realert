@@ -12,16 +12,14 @@ namespace Realert.Services
     public sealed class PriceAlertService : IPriceAlertService
     {
         private readonly RealertContext _context;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
         //private readonly ILogger<PriceAlertService> _logger;
 
-        public PriceAlertService(RealertContext context)
+        public PriceAlertService(RealertContext context, IEmailService emailService)
         {
             _context = context;
-
-            var host = Host.CreateDefaultBuilder().ConfigureServices((_, services) => services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>()).Build();
-            _emailService = host.Services.GetRequiredService<EmailService>();
+            _emailService = emailService;
 
             //_logger = logger;
         }
