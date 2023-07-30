@@ -66,7 +66,7 @@ namespace Realert.Controllers
             // Add new notification to the database.
             try
             {
-                await _alertService.AddNewPropertyAlert(newPropertyAlertNotification);
+                await _alertService.AddAlertAsync(newPropertyAlertNotification);
             }
             catch (Exception ex) 
             {
@@ -143,7 +143,7 @@ namespace Realert.Controllers
             }
 
             // Delete the price alert.
-            await _alertService.DeleteNewPropertyAlert(newPropertyAlertNotification);
+            await _alertService.DeleteAlertAsync(newPropertyAlertNotification);
 
             return RedirectToAction(nameof(Index));
         }
