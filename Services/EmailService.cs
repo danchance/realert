@@ -1,9 +1,10 @@
 ﻿using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
+using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
 
         private readonly IAmazonSimpleEmailService _amazonSimpleEmailService;
