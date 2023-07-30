@@ -10,17 +10,21 @@ using Realert.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddDbContext<RealertContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("RealertContext") ?? throw new InvalidOperationException("Connection string 'RealertContext' not found.")));
 
 builder.Services.AddAWSService<IAmazonSimpleEmailService>().AddTransient<EmailService>();
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IPriceAlertService, PriceAlertService>();
+
 builder.Services.AddScoped<INewPropertyAlertService, NewPropertyAlertService>();
+
 builder.Services.AddScoped<IEmailService, EmailService>();
+
+builder.Services.AddHostedService<JobService>();
 
 var app = builder.Build();
 
