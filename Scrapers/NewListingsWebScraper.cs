@@ -1,33 +1,33 @@
 ﻿using HtmlAgilityPack;
 using Realert.Interfaces;
 using Realert.Models;
-using System.Security.Policy;
 
 namespace Realert.Scrapers
 {
-    /*
-     * Scrapes new property listings from real estate web pages.
-     * Currently supports: Rightmove and Purplebricks
-     */
-    public class NewListingsWebScraper : IWebScraper<NewListingsWebScraper>
+    /// <summary>
+    /// Class <c>NewListingsWebScraper</c> scrapes new property listings from real estate web pages.
+    /// Websites currently supported are: Rightmove and Purplebricks.
+    /// </summary>
+    public sealed class NewListingsWebScraper : IWebScraper<NewListingsWebScraper>
     {
-        /*
-         * Number of results found.
-         */
-        public int ResultCount;
-
-        /*
-         * Private constructor. 
-         * Populates public fields with property data collected by InitializeAsync call.
-         */
-        private NewListingsWebScraper(int results) 
-        { 
-            ResultCount = results;
+        private NewListingsWebScraper(int results)
+        {
+            this.ResultCount = results;
         }
 
-        /*
-         * Creation method used to create a new NewListingsWebScraper instance.
-         */
+        /// <value>
+        /// Number of new property listings.
+        /// </value>
+        public int ResultCount { get; set; }
+
+        /// <summary>
+        /// Method used to create a new <c>NewListingsWebScraper</c> instance. Scrapes the supplied url making,
+        /// data available on the Properties.
+        /// </summary>
+        /// <param name="url">Search url.</param>
+        /// <param name="site">Site being searched.</param>
+        /// <returns><c>NewListingsWebScraper</c> instance.</returns>
+        /// <exception cref="ArgumentException">site must be a supported.</exception>
         public static async Task<NewListingsWebScraper> InitializeAsync(string url, TargetSite site)
         {
             // Fetch new property data for the specified site.
@@ -41,12 +41,15 @@ namespace Realert.Scrapers
             return new NewListingsWebScraper(results);
         }
 
-        /*
-         * Gets the number of property results that match the search url for Rightmove. 
-         */
+        /// <summary>
+        /// Method fetches new listing information for Rightmove.
+        /// </summary>
+        /// <param name="url">Rightmove search url.</param>
+        /// <returns>Number of new listings.</returns>
+        /// <exception cref="ArgumentException">Invalid Url error.</exception>
         private static async Task<int> GetRightmoveResults(string url)
         {
-            HttpClient client = new();
+            HttpClient client = new ();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36");
 
             // Get the first page of results.
@@ -55,8 +58,9 @@ namespace Realert.Scrapers
             {
                 throw new ArgumentException("Invalid URL");
             }
+
             string page = await response.Content.ReadAsStringAsync();
-            HtmlDocument htmlDoc = new();
+            HtmlDocument htmlDoc = new ();
             htmlDoc.LoadHtml(page);
 
             // XPath expression for the element containing the number of results.
@@ -73,12 +77,15 @@ namespace Realert.Scrapers
             return 0;
         }
 
-        /*
-         * Gets the number of property results that match the search url for Purplebricks. 
-         */
+        /// <summary>
+        /// Method fetches new listing information for Purplebricks.
+        /// </summary>
+        /// <param name="url">Rightmove search url.</param>
+        /// <returns>Number of new listings.</returns>
+        /// <exception cref="ArgumentException">Invalid Url error.</exception>
         private static async Task<int> GetPurplebricksResults(string url)
         {
-            HttpClient client = new();
+            HttpClient client = new ();
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36");
 
             // Get the first page of results.
@@ -87,8 +94,9 @@ namespace Realert.Scrapers
             {
                 throw new ArgumentException("Invalid URL");
             }
+
             string page = await response.Content.ReadAsStringAsync();
-            HtmlDocument htmlDoc = new();
+            HtmlDocument htmlDoc = new ();
             htmlDoc.LoadHtml(page);
 
             // XPath expression for the element containing the number of results.

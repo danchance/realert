@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Models;
-using Realert.Services;
+using Realert.Interfaces;
 
 namespace Realert.Controllers
 {

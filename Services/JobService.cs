@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Realert.Data;
+using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class JobService : IHostedService, IDisposable
+    public sealed class JobService : IHostedService, IDisposable
     {
-
         // Define Job Ids for the jobs run by this service.
         private const int PriceAlertJobId = 1;
         private const int NewPropertyAlertJobId = 2;

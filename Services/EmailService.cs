@@ -4,26 +4,32 @@ using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class EmailService : IEmailService
+    public sealed class EmailService : IEmailService
     {
+        // Email address alerts are sent from.
+        private const string SenderAddress = "dan.chance@outlook.com";
 
-        private readonly IAmazonSimpleEmailService _amazonSimpleEmailService;
-        private const string _senderAddress = "dan.chance@outlook.com";
+        // Fields.
+        private readonly IAmazonSimpleEmailService amazonSimpleEmailService;
 
-        public EmailService(IAmazonSimpleEmailService amazonSimpleEmailService) 
+        public EmailService(IAmazonSimpleEmailService amazonSimpleEmailService)
         {
-            _amazonSimpleEmailService = amazonSimpleEmailService;
+            this.amazonSimpleEmailService = amazonSimpleEmailService;
         }
 
-        /*
-         * Uses AWS SES to send an email.
-         */
+        /// <summary>
+        /// Method uses AWS Simple Email Service to send an email.
+        /// </summary>
+        /// <param name="toAddress">Address to send the email to.</param>
+        /// <param name="bodyHtml">HTML body of the email message.</param>
+        /// <param name="subject">Subject of the email.</param>
+        /// <returns>Email message Id.</returns>
         public async Task<string> SendEmailAsync(List<string> toAddress, string bodyHtml, string subject)
         {
             var messageId = "";
             try
             {
-                var response = await _amazonSimpleEmailService.SendEmailAsync(
+                var response = await this.amazonSimpleEmailService.SendEmailAsync(
                     new SendEmailRequest
                     {
                         Destination = new Destination
@@ -37,20 +43,20 @@ namespace Realert.Services
                                 Html = new Content
                                 {
                                     Charset = "UTF-8",
-                                    Data = bodyHtml
-                                }
+                                    Data = bodyHtml,
+                                },
                             },
                             Subject = new Content
                             {
                                 Charset = "UTF-8",
-                                Data = subject
-                            }
+                                Data = subject,
+                            },
                         },
-                        Source = _senderAddress
-                    }); 
+                        Source = SenderAddress,
+                    });
                 messageId = response.MessageId;
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine("SendEmailAsync failed with exception: " + ex.Message);
             }
