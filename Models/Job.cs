@@ -24,7 +24,6 @@ namespace Realert.Models
         /*
          * The day the job was last run.
          */
-        [DataType(DataType.Date)]
-        public DateTime? LastRun { get; set; }
+        public DateTime LastRun { get; set; }
     }
 }
