@@ -102,13 +102,12 @@ namespace Realert.Controllers
             try
             {
                 PriceAlertService priceAlertService = new(_context);
-                await priceAlertService.AddPriceAlert(priceAlertNotification);
+                await priceAlertService.AddAlertAsync(priceAlertNotification);
             } catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            
             return RedirectToAction(nameof(Index));
         }
 
