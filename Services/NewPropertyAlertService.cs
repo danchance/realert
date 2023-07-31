@@ -1,49 +1,60 @@
-﻿using Amazon.SimpleEmail;
-using Realert.Data;
+﻿using Realert.Data;
+using Realert.Interfaces;
 using Realert.Models;
 using Realert.Scrapers;
-using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public interface INewPropertyAlertService : IAlertService<NewPropertyAlertNotification> {}
-
-    public class NewPropertyAlertService : INewPropertyAlertService
+    public sealed class NewPropertyAlertService : INewPropertyAlertService
     {
-        private readonly RealertContext _context;
-        private readonly IEmailService _emailService;
+        // Fields.
+        private readonly RealertContext context;
+        private readonly IEmailService emailService;
+        private readonly ILogger<NewPropertyAlertService> logger;
 
-        public NewPropertyAlertService(RealertContext context, IEmailService emailService)
+        public NewPropertyAlertService(RealertContext context, IEmailService emailService, ILogger<NewPropertyAlertService> logger)
         {
-            _context = context;
-            _emailService = emailService;
+            this.context = context;
+            this.emailService = emailService;
+            this.logger = logger;
         }
 
-        /*
-         * Add a New Property Alert.
-         */
+        /// <summary>
+        /// Method adds a New Property Alert.
+        /// </summary>
+        /// <param name="newPropertyAlert">Alert to add.</param>
+        /// <returns>Async operation.</returns>
         public async Task AddAlertAsync(NewPropertyAlertNotification newPropertyAlert)
         {
-            _context.Add(newPropertyAlert);
-            await _context.SaveChangesAsync();
+            this.context.Add(newPropertyAlert);
+            await this.context.SaveChangesAsync();
+
+            int id = newPropertyAlert.Id;
+            this.logger.LogInformation("New Property Alert Added, Id = {id}", id);
         }
 
-        /*
-         * Delete a New Property Alert.
-         */
+        /// <summary>
+        /// Method deletes a New Property Alert.
+        /// </summary>
+        /// <param name="newPropertyAlert">Alert to delete.</param>
+        /// <returns>Async operation.</returns>
         public async Task DeleteAlertAsync(NewPropertyAlertNotification newPropertyAlert)
         {
-            _context.Remove(newPropertyAlert);
-            await _context.SaveChangesAsync();
+            this.context.Remove(newPropertyAlert);
+            await this.context.SaveChangesAsync();
+
+            int id = newPropertyAlert.Id;
+            this.logger.LogInformation("New Property Alert Deleted, Id = {id}", id);
         }
 
-        /*
-         * Checks all New Property Alerts setup for any new properties listed. 
-         * If new property listings are found a notification is sent to the user.
-         */
+        /// <summary>
+        /// Method iterates through all New Property Alerts, checking for any new properties listed.
+        /// If new property listings are found a notification is sent to the user.
+        /// </summary>
+        /// <returns>Async operation.</returns>
         public async Task PerformScanAsync()
         {
-            var newPropertyAlerts = _context.NewPropertyAlertNotification.ToList();
+            var newPropertyAlerts = this.context.NewPropertyAlertNotification.ToList();
 
             for (int i = 0; i < newPropertyAlerts.Count; i++)
             {
@@ -52,24 +63,26 @@ namespace Realert.Services
                 // If no scan has been performed before, carry out the first scan
                 if (newPropertyAlert.LastScannedDate == null)
                 {
-                    await ScanNewPropertiesAsync(newPropertyAlert);
+                    await this.ScanNewPropertiesAsync(newPropertyAlert);
                     continue;
                 }
 
-                // Scan has already been performed, check if enough time has elapsed 
+                // Scan has already been performed, check if enough time has elapsed
                 // since the last scan.
                 int daysSinceLastScan = (DateTime.Today - (DateTime)newPropertyAlert.LastScannedDate!).Days;
-                if (daysSinceLastScan >= newPropertyAlert.NotificationFrequency) 
+                if (daysSinceLastScan >= newPropertyAlert.NotificationFrequency)
                 {
-                    await ScanNewPropertiesAsync(newPropertyAlert);
+                    await this.ScanNewPropertiesAsync(newPropertyAlert);
                 }
             }
         }
 
-        /*
-         * Scans for new properties that match the search query, and notifies the user if
-         * it finds any.
-         */
+        /// <summary>
+        /// Method performs a scan for any new property listings for an individual alert, and notifies
+        /// the user if any are found.
+        /// </summary>
+        /// <param name="newPropertyAlert">Alert to perform scan for.</param>
+        /// <returns>Async operation.</returns>
         private async Task ScanNewPropertiesAsync(NewPropertyAlertNotification newPropertyAlert)
         {
             string url = newPropertyAlert.GetUrl();
@@ -82,7 +95,7 @@ namespace Realert.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message); 
+                Console.WriteLine(ex.Message);
                 return;
             }
 
@@ -93,26 +106,35 @@ namespace Realert.Services
             }
 
             // Results found, send a notfication the to user.
-            await SendAlertAsync(newPropertyAlert, propertyScraper.ResultCount, url);
+            var messageId = await this.SendAlertAsync(newPropertyAlert, propertyScraper.ResultCount, url);
+            int id = newPropertyAlert.Id;
+            this.logger.LogInformation("New Property Alert Sent, Id = {id}, MessageId = {messageId}", id, messageId);
 
             // Only update last scanned date if a notification was sent to the user.
             newPropertyAlert.LastScannedDate = DateTime.Today;
-            _context.Update(newPropertyAlert);
-            await _context.SaveChangesAsync();
+            this.context.Update(newPropertyAlert);
+            await this.context.SaveChangesAsync();
         }
 
-        /*
-         * Used to send an email notification when new property listings are found.
-         */
-        private async Task SendAlertAsync(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
+        /// <summary>
+        /// Method used to send an email alert to the usr to notify them that new property listings have been
+        /// found.
+        /// </summary>
+        /// <param name="newPropertyAlert">Alert to send notification for.</param>
+        /// <param name="resultCount">Number of new listings found.</param>
+        /// <param name="link">Link to the new listings.</param>
+        /// <returns>Message Id.</returns>
+        private async Task<string> SendAlertAsync(NewPropertyAlertNotification newPropertyAlert, int resultCount, string link)
         {
             var toAddresses = new List<string> { newPropertyAlert.Email! };
             var subject = $"Realert - New Properties Found";
-            var bodyHtml = $"<strong>{resultCount}</strong> new properties have been found for your alert: {newPropertyAlert.NotificationName}<br><br>Take a look <a href=\"{link}\">here</a>.<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/NewPropertyAlertNotification/Delete/{newPropertyAlert.Id}?code={newPropertyAlert.DeleteCode}\">here</a>.</p>";
+            var bodyHtml = $"<strong>{resultCount}</strong> new properties have been found for your alert: {newPropertyAlert.NotificationName}<br><br>Take a look "
+                + $"<a href=\"{link}\">here</a>.<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe "
+                + $"<a href=\"https://localhost:7231/NewPropertyAlertNotification/Delete/{newPropertyAlert.Id}?code={newPropertyAlert.DeleteCode}\">here</a>.</p>";
 
-            var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
+            var messageId = await this.emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
 
-            Console.WriteLine(messageId);
+            return messageId;
         }
     }
 }

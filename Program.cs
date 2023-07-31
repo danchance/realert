@@ -1,11 +1,7 @@
 ﻿using Amazon.SimpleEmail;
-using Microsoft.DotNet.Scaffolding.Shared.ProjectModel;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Realert.Data;
 using Realert.Interfaces;
-using Realert.Models;
 using Realert.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +28,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }

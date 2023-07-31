@@ -19,6 +19,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +33,13 @@
   <Target Name="Tailwind" BeforeTargets="Build">
     <Exec Command="npm run css:build" />
   </Target>
+
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\Dan\Documents\Realert\Realert\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Dan\Documents\Realert\Realert\.editorconfig" />
+  </ItemGroup>
 
 </Project>

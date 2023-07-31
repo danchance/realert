@@ -1,66 +1,59 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Realert.Data;
+using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public class JobService : IHostedService, IDisposable
+    public sealed class JobService : IHostedService, IDisposable
     {
-        private readonly ILogger<JobService> _logger;
-        private readonly IServiceScopeFactory _scopeFactory;
-        private Timer? _timer = null;
+        // Define Job Ids for the jobs run by this service.
+        private const int PriceAlertJobId = 1;
+        private const int NewPropertyAlertJobId = 2;
 
-        /*
-         * Define Job Ids for the jobs run by this service.
-         */
-        private const int _priceAlertJobId = 1;
-        private const int _newPropertyAlertJobId = 2;
+        // Fields.
+        private readonly ILogger<JobService> logger;
+        private readonly IServiceScopeFactory scopeFactory;
+        private Timer? timer = null;
 
-        public JobService(ILogger<JobService> logger, IServiceScopeFactory scopeFactory) 
+        public JobService(ILogger<JobService> logger, IServiceScopeFactory scopeFactory)
         {
-            _logger = logger;
-            _scopeFactory = scopeFactory;
+            this.logger = logger;
+            this.scopeFactory = scopeFactory;
         }
 
-        /*
-         * Start timer to run jobs every hour.
-         */
+        /// <inheritdoc/>
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Job Service started.");
+            this.logger.LogInformation("Job Service started.");
 
-            _timer = new Timer(RunJobs, null, TimeSpan.Zero, TimeSpan.FromHours(1));
-
-            return Task.CompletedTask;  
-        }
-
-        /*
-         * Disable the timer.
-         */
-        public Task StopAsync(CancellationToken stoppingToken) 
-        {
-            _logger.LogInformation("Job Service stopped.");
-
-            _timer?.Change(Timeout.Infinite, 0);
+            this.timer = new Timer(this.RunJobs, null, TimeSpan.Zero, TimeSpan.FromHours(1));
 
             return Task.CompletedTask;
         }
 
-        /*
-         * Dispose of the timer.
-         */
-        public void Dispose() 
+        /// <inheritdoc/>
+        public Task StopAsync(CancellationToken stoppingToken)
         {
-            _timer?.Dispose();
+            this.logger.LogInformation("Job Service stopped.");
+
+            this.timer?.Change(Timeout.Infinite, 0);
+
+            return Task.CompletedTask;
         }
 
-        /*
-         * Runs active jobs setup in the Job table. Current supported jobs are:
-         *  - Price Alert (runs once a day).
-         *  - New Property Alert (runs once a day).
-         */
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            this.timer?.Dispose();
+        }
+
+        /// <summary>
+        /// Method runs the Price Alert and New Property Alert jobs once per day.
+        /// </summary>
+        /// <param name="state">Unused.</param>
         private async void RunJobs(object? state)
         {
-            using var scope = _scopeFactory.CreateScope();
+            using var scope = this.scopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetService<RealertContext>();
             if (dbContext == null)
             {
@@ -68,17 +61,18 @@ namespace Realert.Services
             }
 
             // Price Alert Job.
-            var job = await dbContext.Job.FirstOrDefaultAsync(j => j.Id == _priceAlertJobId);
+            var job = await dbContext.Job.FirstOrDefaultAsync(j => j.Id == PriceAlertJobId);
             if (job != null)
             {
                 var hoursSinceLastRun = (DateTime.Now - job.LastRun).TotalHours;
+
                 // Run job if its:
                 //  - Set as active, and
                 //  - Not currently running, and
                 //  - At least 24 hours since the last run.
                 if (job.IsActive && !job.IsRunning && hoursSinceLastRun >= 24)
                 {
-                    _logger.LogInformation("Price Alert job started.");
+                    this.logger.LogInformation("Price Alert job started.");
 
                     // Set job status to currently running.
                     job.IsRunning = true;
@@ -97,27 +91,28 @@ namespace Realert.Services
                     dbContext.Job.Update(job);
                     await dbContext.SaveChangesAsync();
 
-                    _logger.LogInformation("Price Alert job finished.");
+                    this.logger.LogInformation("Price Alert job finished.");
                 }
             }
             else
             {
                 // Job is not setup correctly, log warning.
-                _logger.LogWarning("Price Alert job is not setup.");
+                this.logger.LogWarning("Price Alert job is not setup.");
             }
 
             // New Property Alert Job.
-            job = await dbContext.Job.FirstOrDefaultAsync(j => j.Id == _newPropertyAlertJobId);
+            job = await dbContext.Job.FirstOrDefaultAsync(j => j.Id == NewPropertyAlertJobId);
             if (job != null)
             {
                 var hoursSinceLastRun = (DateTime.Now - job.LastRun).TotalHours;
+
                 // Run job if its:
                 //  - Set as active, and
                 //  - Not currently running, and
                 //  - At least 24 hours since the last run.
                 if (job.IsActive && !job.IsRunning && hoursSinceLastRun >= 24)
                 {
-                    _logger.LogInformation("New Property Alert job started.");
+                    this.logger.LogInformation("New Property Alert job started.");
 
                     // Set job status to currently running.
                     job.IsRunning = true;
@@ -136,13 +131,13 @@ namespace Realert.Services
                     dbContext.Job.Update(job);
                     await dbContext.SaveChangesAsync();
 
-                    _logger.LogInformation("New Property Alert job finished.");
+                    this.logger.LogInformation("New Property Alert job finished.");
                 }
             }
             else
             {
                 // Job is not setup correctly, log warning.
-                _logger.LogWarning("New Property Alert job is not setup.");
+                this.logger.LogWarning("New Property Alert job is not setup.");
             }
         }
     }

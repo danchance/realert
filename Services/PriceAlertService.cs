@@ -1,94 +1,106 @@
-﻿using Amazon.SimpleEmail;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Realert.Data;
+using Realert.Interfaces;
 using Realert.Models;
 using Realert.Scrapers;
-using Realert.Interfaces;
 
 namespace Realert.Services
 {
-    public interface IPriceAlertService : IAlertService<PriceAlertNotification> { }
-
     public sealed class PriceAlertService : IPriceAlertService
     {
-        private readonly RealertContext _context;
-        private readonly IEmailService _emailService;
+        // Fields.
+        private readonly RealertContext context;
+        private readonly IEmailService emailService;
+        private readonly ILogger<PriceAlertService> logger;
 
-        //private readonly ILogger<PriceAlertService> _logger;
-
-        public PriceAlertService(RealertContext context, IEmailService emailService)
+        public PriceAlertService(RealertContext context, IEmailService emailService, ILogger<PriceAlertService> logger)
         {
-            _context = context;
-            _emailService = emailService;
-
-            //_logger = logger;
+            this.context = context;
+            this.emailService = emailService;
+            this.logger = logger;
         }
 
-        /*
-         * Performs intial setup for adding a property price alert.
-         */
+        /// <summary>
+        /// Method adds a Price Alert and performs a scan for the initial property price.
+        /// </summary>
+        /// <param name="priceAlert">Alert to add.</param>
+        /// <returns>Async operation.</returns>
         public async Task AddAlertAsync(PriceAlertNotification priceAlert)
         {
             // Fetch details of the property.
             // Note: Do this before adding the alert as this will also validate if the
             // property exists/url is valid.
-            PropertyListingWebScraper propertyScraper = await PropertyListingWebScraper.InitializeAsync(priceAlert.ListingLink!, priceAlert.TargetSite);           
+            PropertyListingWebScraper propertyScraper = await PropertyListingWebScraper.InitializeAsync(priceAlert.ListingLink!, priceAlert.TargetSite);
 
             // Add price alert to database.
-            _context.Add(priceAlert);
-            await _context.SaveChangesAsync();
+            this.context.Add(priceAlert);
+            await this.context.SaveChangesAsync();
 
             // Add property to database.
-            await AddProperty(propertyScraper.PropertyName!, propertyScraper.PropertyPrice, priceAlert.Id);
+            await this.AddProperty(propertyScraper.PropertyName!, propertyScraper.PropertyPrice, priceAlert.Id);
+
+            int id = priceAlert.Id;
+            this.logger.LogInformation("Price Alert Added, Id = {id}", id);
 
             return;
         }
 
-        /*
-         * Used to delete a price alert and the linked property and, if the user has delist alerts on,
-         * send a notification to inform them.
-         */
+        /// <summary>
+        /// Method deletes a Price Alert and the associated property.
+        /// </summary>
+        /// <param name="priceAlert">Alert to delete.</param>
+        /// <returns>Async operation.</returns>
         public async Task DeleteAlertAsync(PriceAlertNotification priceAlert)
         {
-            _context.Remove(priceAlert);
-            await _context.SaveChangesAsync();
+            this.context.Remove(priceAlert);
+            await this.context.SaveChangesAsync();
+
+            int id = priceAlert.Id;
+            this.logger.LogInformation("Price Alert Deleted, Id = {id}", id);
         }
 
-        /*
-         * Add property for a price alert.
-         */
+        /// <summary>
+        /// Method iterates through all Price Alerts, checking for a change in the property price. If the
+        /// price has changed a notification is sent to the user.
+        /// </summary>
+        /// <returns>Async operation.</returns>
+        public async Task PerformScanAsync()
+        {
+            var priceAlerts = this.context.PriceAlertNotification.Include("Property").ToList();
+
+            for (int i = 0; i < priceAlerts.Count; i++)
+            {
+                await this.ScanPropertyAsync(priceAlerts[i]);
+            }
+        }
+
+        /// <summary>
+        /// Method adds a property for a Price Alert.
+        /// </summary>
+        /// <param name="name">Name/address of the property.</param>
+        /// <param name="price">Property price.</param>
+        /// <param name="alertId">Id of associated alert.</param>
+        /// <returns>Async operation.</returns>
         private async Task AddProperty(string name, int price, int alertId)
         {
             // Add property to database.
-            PriceAlertProperty priceAlertProperty = new()
+            PriceAlertProperty priceAlertProperty = new ()
             {
                 PropertyName = name,
                 FirstScannedPrice = price,
                 LastScannedPrice = price,
                 PriceAlertNotificationId = alertId,
             };
-            _context.Add(priceAlertProperty);
-            await _context.SaveChangesAsync();
+            this.context.Add(priceAlertProperty);
+            await this.context.SaveChangesAsync();
         }
 
-        /*
-         * Checks all Price Alerts setup for a change in price in the property. If the price
-         * has changed a notification is sent to the user.
-         */
-        public async Task PerformScanAsync()
-        {
-            var priceAlerts = _context.PriceAlertNotification.Include("Property").ToList();
-
-            for (int i = 0; i < priceAlerts.Count; i++)
-            {
-                await ScanPropertyAsync(priceAlerts[i]);
-            }
-        }
-
-        /*
-         * Scan property to get its current price, if the price has changed from the 
-         * last scan, notify the user.
-         */
+        /// <summary>
+        /// Method performs a scan of an individual property, retrieving its current price. If the price
+        /// has changed the user is notified according to their preferences.
+        /// </summary>
+        /// <param name="priceAlert">Alert to perform scan for.</param>
+        /// <returns>Async operation.</returns>
         private async Task ScanPropertyAsync(PriceAlertNotification priceAlert)
         {
             PropertyListingWebScraper propertyScraper;
@@ -100,20 +112,23 @@ namespace Realert.Services
             catch (Exception)
             {
                 // Property does not exist, delete the nofication.
-                await DeleteAlertAsync(priceAlert);
+                await this.DeleteAlertAsync(priceAlert);
 
                 // If the user has delist alerts on, send notification.
                 if (priceAlert.NotifyOnPropertyDelist)
                 {
-                    await SendDelistAlertAsync(priceAlert);
+                    var messageId = await this.SendDelistAlertAsync(priceAlert);
+                    int id = priceAlert.Id;
+                    this.logger.LogInformation("Price Alert Sent [Delist], Id = {id}, MessageId = {messageId}", id, messageId);
                 }
+
                 return;
             }
 
             // Property should not be null at this point, but if it is add it and exit.
             if (priceAlert.Property == null)
             {
-                await AddProperty(propertyScraper.PropertyName!, propertyScraper.PropertyPrice, priceAlert.Id);
+                await this.AddProperty(propertyScraper.PropertyName!, propertyScraper.PropertyPrice, priceAlert.Id);
                 return;
             }
 
@@ -131,59 +146,70 @@ namespace Realert.Services
             // If price has increased, check if user wants to receive price alerts.
             if (priceDifference < 0 || priceAlert.NotifyOnPriceIncrease)
             {
-                await SendAlertAsync(priceAlert, propertyScraper.PropertyPrice);
+                var messageId = await this.SendAlertAsync(priceAlert, propertyScraper.PropertyPrice);
+                int id = priceAlert.Id;
+                this.logger.LogInformation("Price Alert Sent [Price Change], Id = {id}, MessageId = {messageId}", id, messageId);
             }
 
             // Update property with the latest price data.
             property.LastScannedPrice = propertyScraper.PropertyPrice;
-            _context.Update(property);
-            await _context.SaveChangesAsync();
+            this.context.Update(property);
+            await this.context.SaveChangesAsync();
         }
 
-        /*
-         * Used to send an email or text notification to the user to notify them that the property
-         * price has increased/decreased.
-         */
-        private async Task SendAlertAsync(PriceAlertNotification priceAlert, int newPrice)
+        /// <summary>
+        /// Method used to send an email or text alert to the user to notify them that the property price
+        /// has changed.
+        /// </summary>
+        /// <param name="priceAlert">Alert to send notification for.</param>
+        /// <param name="newPrice">New price of the property.</param>
+        /// <returns>Message Id.</returns>
+        private async Task<string> SendAlertAsync(PriceAlertNotification priceAlert, int newPrice)
         {
             // Send an email notification.
             if (priceAlert.NotificationType == Notification.Email)
             {
                 var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Price Change";
-                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href=\"https://localhost:7231/PriceAlertNotification/Property/{priceAlert.Id}\">{priceAlert.Property!.PropertyName}</a> has dropped in price.<br><br>Original Price: £{priceAlert.Property!.FirstScannedPrice}<br>Current Price: £{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe <a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Good news, the property <a href=\"https://localhost:7231/PriceAlertNotification/Property/{priceAlert.Id}\">"
+                    + $"{priceAlert.Property!.PropertyName}</a> has dropped in price.<br><br>Original Price: £{priceAlert.Property!.FirstScannedPrice}<br>Current Price: "
+                    + $"£{newPrice}<br><br><br><p style=\"font-size:12px\">If you'd like to stop receiving these emails you can unsubscribe "
+                    + $"<a href=\"https://localhost:7231/PriceAlertNotification/Delete/{priceAlert.Id}?code={priceAlert.DeleteCode}\">here</a>.</p>";
 
-                var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject); 
+                var messageId = await this.emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
 
-                Console.WriteLine(messageId);
-                return;
+                return messageId;
             }
 
             // Send a text notification.
             // TODO: Use AWS SNS to send text message.
+            return "Text Id: Not yet implemented.";
         }
 
-        /*
-         * Used to send an email or text notification to the user to notify them that the property has
-         * been delisted.
-         */
-        private async Task SendDelistAlertAsync(PriceAlertNotification priceAlert)
+        /// <summary>
+        /// Method used to send an email or text alert to the user to notify them that the property has
+        /// been delisted.
+        /// </summary>
+        /// <param name="priceAlert">Alert for property with price change.</param>
+        /// <returns>Message Id.</returns>
+        private async Task<string> SendDelistAlertAsync(PriceAlertNotification priceAlert)
         {
             // Send an email notification.
-            if (priceAlert.NotificationType == Notification.Email) 
+            if (priceAlert.NotificationType == Notification.Email)
             {
                 var toAddresses = new List<string> { priceAlert.Email! };
                 var subject = $"Realert - Property Delisted";
-                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{priceAlert.Property!.PropertyName}</a> has been delisted and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert ";
+                var bodyHtml = $"Hi {priceAlert.Name},<br><br>Bad news, the property <a href={priceAlert.ListingLink}>{priceAlert.Property!.PropertyName}</a> has been delisted "
+                    + $"and you will no longer receive alerts for this property.<br><br>Visit us <a href=\"\">here</a> to setup a new alert.<br><br>Thanks, Realert";
 
-                var messageId = await _emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
+                var messageId = await this.emailService.SendEmailAsync(toAddresses, bodyHtml, subject);
 
-                Console.WriteLine(messageId);
-                return;
+                return messageId;
             }
 
             // Send a text notification.
             // TODO: Use AWS SNS to send text message.
+            return "";
         }
     }
 }

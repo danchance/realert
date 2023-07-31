@@ -1,50 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
+using Realert.Interfaces;
 using Realert.Models;
-using Realert.Services;
 
 namespace Realert.Controllers
 {
     public class NewPropertyAlertNotificationController : Controller
     {
-        private readonly RealertContext _context;
-        private readonly INewPropertyAlertService _newPropertyAlertService;
+        private readonly RealertContext context;
+        private readonly INewPropertyAlertService newPropertyAlertService;
 
         public NewPropertyAlertNotificationController(RealertContext context, INewPropertyAlertService newPropertyAlertService)
         {
-            _context = context;
-            _newPropertyAlertService = newPropertyAlertService;
+            this.context = context;
+            this.newPropertyAlertService = newPropertyAlertService;
         }
 
-        // GET: NewPropertyAlertNotification
+        /// <summary>
+        /// GET: NewPropertyAlertNotification.
+        /// </summary>
         public IActionResult Index()
         {
-            return View(new NewPropertyAlertSetupViewModel());
+            return this.View(new NewPropertyAlertSetupViewModel());
         }
 
-
-        // GET: NewPropertyAlertNotification/Create
+        /// <summary>
+        /// GET: NewPropertyAlertNotification/Create.
+        /// </summary>
         public IActionResult Create()
         {
-            return View("Index");
+            return this.View("Index");
         }
 
-        /*
-         * POST: NewPropertyAlertNotification/Create
-         */
+        /// <summary>
+        /// POST: NewPropertyAlertNotification/Create.
+        /// Adds a New Property Alert.
+        /// </summary>
+        /// <param name="newPropertyAlert">Property Alert to add.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Email,NotificationName,TargetSite,NotificationFrequency,PropertyType,Location,SearchRadius,MinPrice,MaxPrice,MinBeds,MaxBeds,SearchLink")] NewPropertyAlertSetupViewModel newPropertyAlert)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return View("Index", newPropertyAlert);
+                return this.View("Index", newPropertyAlert);
             }
 
             // Create new property alert notification.
@@ -66,31 +66,33 @@ namespace Realert.Controllers
             // Add new notification to the database.
             try
             {
-                await _newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
+                await this.newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            return RedirectToAction(nameof(Index));
+            return this.RedirectToAction(nameof(this.Index));
         }
 
-        /*
-         * GET: NewPropertyAlertNotification/Delete/[id]
-         */
+        /// <summary>
+        /// GET: NewPropertyAlertNotification/Delete/[id].
+        /// </summary>
+        /// <param name="id">Id of the alert to delete.</param>
+        /// <param name="displayError">True if an error occurred deleting the alert.</param>
         public async Task<IActionResult> Delete(int? id, bool? displayError)
         {
-            if (id == null || _context.NewPropertyAlertNotification == null)
+            if (id == null || this.context.NewPropertyAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             // Get details for the notification and the associated property.
-            var newPropertyAlertNotification = await _context.NewPropertyAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
+            var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
             if (newPropertyAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             var editNewPropertyAlertViewModel = new EditNewPropertyAlertViewModel
@@ -111,41 +113,46 @@ namespace Realert.Controllers
             // Display an error message if an unauthorized user tried to delete the notification.
             if (displayError != null && displayError == true)
             {
-                ModelState.AddModelError("DeleteCode", "You do not have permission to delete this property alert. Please use the unsubscribe link on the email to stop receiving alerts.");
+                this.ModelState.AddModelError("DeleteCode", "You do not have permission to delete this property alert. Please use the unsubscribe link on the email to stop receiving alerts.");
             }
-            return View(editNewPropertyAlertViewModel);
+
+            return this.View(editNewPropertyAlertViewModel);
         }
 
-        /*
-         * POST: NewPropertyAlertNotification/Delete/[id]
-         */
-        [HttpPost, ActionName("Delete")]
+        /// <summary>
+        /// POST: NewPropertyAlertNotification/Delete/[id].
+        /// Deletes a New Property Alert.
+        /// </summary>
+        /// <param name="id">Id of the alert to delete.</param>
+        /// <param name="editNewPropertyAlert">Details of the alert.</param>
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, [Bind("DeleteCode")] EditNewPropertyAlertViewModel editNewPropertyAlert)
         {
-            if (_context.NewPropertyAlertNotification == null)
+            if (this.context.NewPropertyAlertNotification == null)
             {
-                return Problem("Entity set 'RealertContext.NewPropertyAlertNotification' is null.");
+                return this.Problem("Entity set 'RealertContext.NewPropertyAlertNotification' is null.");
             }
 
             // Find the alert with the supplied Id and verify it exists.
-            var newPropertyAlertNotification = await _context.NewPropertyAlertNotification.FindAsync(id);
+            var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FindAsync(id);
             if (newPropertyAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user, 
+            // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user,
             // this ensures only the user receiving the emails can delete the alert.
             if (newPropertyAlertNotification.DeleteCode != editNewPropertyAlert.DeleteCode)
             {
-                return RedirectToAction("Delete", new { id, displayError = true });
+                return this.RedirectToAction("Delete", new { id, displayError = true });
             }
 
             // Delete the price alert.
-            await _newPropertyAlertService.DeleteAlertAsync(newPropertyAlertNotification);
+            await this.newPropertyAlertService.DeleteAlertAsync(newPropertyAlertNotification);
 
-            return RedirectToAction(nameof(Index));
+            return this.RedirectToAction(nameof(this.Index));
         }
     }
 }

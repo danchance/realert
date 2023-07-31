@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Realert.Models;
 
 namespace Realert.Data
 {
     public class RealertContext : DbContext
     {
-        public RealertContext (DbContextOptions<RealertContext> options)
+        public RealertContext(DbContextOptions<RealertContext> options)
             : base(options)
         {
         }
 
-        public DbSet<Realert.Models.PriceAlertNotification> PriceAlertNotification { get; set; } = default!;
+        public DbSet<PriceAlertNotification> PriceAlertNotification { get; set; } = default!;
 
-        public DbSet<Realert.Models.NewPropertyAlertNotification> NewPropertyAlertNotification { get; set; } = default!;
+        public DbSet<NewPropertyAlertNotification> NewPropertyAlertNotification { get; set; } = default!;
 
-        public DbSet<Realert.Models.Job> Job { get; set; } = default!;
+        public DbSet<Job> Job { get; set; } = default!;
     }
 }
