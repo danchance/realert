@@ -1,49 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Realert.Data;
-using Realert.Models;
 using Realert.Interfaces;
+using Realert.Models;
 
 namespace Realert.Controllers
 {
     public class PriceAlertNotificationController : Controller
     {
-        private readonly RealertContext _context;
-        private readonly IPriceAlertService _priceAlertService;
+        private readonly RealertContext context;
+        private readonly IPriceAlertService priceAlertService;
 
         public PriceAlertNotificationController(RealertContext context, IPriceAlertService priceAlertService)
         {
-            _context = context;
-            _priceAlertService = priceAlertService;
+            this.context = context;
+            this.priceAlertService = priceAlertService;
         }
 
-        // GET: PriceAlertNotification
+        /// <summary>
+        /// GET: PriceAlertNotification.
+        /// </summary>
         public IActionResult Index()
         {
-            return View(new PriceAlertSetupViewModel());
-
+            return this.View(new PriceAlertSetupViewModel());
         }
 
-        /*
-         * GET PriceAlertNotification/Property/[id]
-         */
+        /// <summary>
+        /// GET: PriceAlertNotification/Create.
+        /// </summary>
+        public IActionResult Create()
+        {
+            return this.View("Index");
+        }
+
+        /// <summary>
+        /// GET PriceAlertNotification/Property/[id].
+        /// Displays information about the property linked to the Price Alert.
+        /// </summary>
+        /// <param name="id">Property Id.</param>
         public async Task<IActionResult> Property(int? id)
         {
-            if (id == null || _context.NewPropertyAlertNotification == null)
+            if (id == null || this.context.NewPropertyAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
-            var priceAlertNotification = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
+
+            var priceAlertNotification = await this.context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
+
             var editPriceAlertViewModel = new EditPriceAlertViewModel
             {
                 NotificationType = priceAlertNotification.NotificationType,
@@ -56,29 +63,26 @@ namespace Realert.Controllers
                 CreatedAt = priceAlertNotification.CreatedAt,
                 Property = priceAlertNotification.Property,
             };
-            return View(editPriceAlertViewModel);
+
+            return this.View(editPriceAlertViewModel);
         }
 
-        // GET: PriceAlertNotification/Create
-        public IActionResult Create()
-        {
-            return View("Index");
-        }
-
-        /*
-         * POST: PriceAlertNotification/Create
-         */
+        /// <summary>
+        /// POST: PriceAlertNotification/Create.
+        /// Adds a Price Alert.
+        /// </summary>
+        /// <param name="priceAlert">Price Alert to add.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Email,PhoneNumber,PriceThreshold,ListingLink,NotifyOnPriceIncrease,NotifyOnPropertyDelist,NotificationType,Note")] PriceAlertSetupViewModel priceAlert)
         {
-            if (!ModelState.IsValid)
+            if (!this.ModelState.IsValid)
             {
-                return View("Index", priceAlert);
+                return this.View("Index", priceAlert);
             }
 
             // Create new price alert notification.
-            PriceAlertNotification priceAlertNotification = new()
+            PriceAlertNotification priceAlertNotification = new ()
             {
                 Name = priceAlert.Name,
                 Email = priceAlert.Email,
@@ -95,39 +99,44 @@ namespace Realert.Controllers
             try
             {
                 priceAlertNotification.ListingLink = priceAlert.ListingLink;
-            } catch (Exception) 
+            }
+            catch (Exception)
             {
-                ModelState.AddModelError("ListingLink", "Please enter a valid link. Supported sites are: Rightmove and Purplebricks.");
-                return View("Index", priceAlert);
+                this.ModelState.AddModelError("ListingLink", "Please enter a valid link. Supported sites are: Rightmove and Purplebricks.");
+                return this.View("Index", priceAlert);
             }
 
             try
             {
-                await _priceAlertService.AddAlertAsync(priceAlertNotification);
-            } catch (Exception ex)
+                await this.priceAlertService.AddAlertAsync(priceAlertNotification);
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
 
-            return RedirectToAction(nameof(Index));
+            return this.RedirectToAction(nameof(this.Index));
         }
 
-        /*
-         * GET: PriceAlertNotification/Delete/[id]
-         */
+        /// <summary>
+        /// GET: PriceAlertNotification/Delete/[id].
+        /// </summary>
+        /// <param name="id">Id of the alert to delete.</param>
+        /// <param name="displayError">True if an error occurred deleting the alert.</param>
         public async Task<IActionResult> Delete(int? id, bool? displayError)
         {
-            if (id == null || _context.PriceAlertNotification == null)
+            if (id == null || this.context.PriceAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             // Get details for the notification and the associated property.
-            var priceAlertNotification = await _context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
+            var priceAlertNotification = await this.context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
+
             var editPriceAlertViewModel = new EditPriceAlertViewModel
             {
                 NotificationType = priceAlertNotification.NotificationType,
@@ -144,42 +153,46 @@ namespace Realert.Controllers
             // Display an error message if an unauthorized user tried to delete the notification.
             if (displayError != null && displayError == true)
             {
-                ModelState.AddModelError("DeleteCode", "You do not have permission to delete this price alert. Please use the unsubscribe link on an email/text to stop receiving alerts.");
+                this.ModelState.AddModelError("DeleteCode", "You do not have permission to delete this price alert. Please use the unsubscribe link on an email/text to stop receiving alerts.");
             }
 
-            return View(editPriceAlertViewModel);
+            return this.View(editPriceAlertViewModel);
         }
 
-        /*
-         * POST: PriceAlertNotification/Delete/[id]
-         */
-        [HttpPost, ActionName("Delete")]
+        /// <summary>
+        /// POST: PriceAlertNotification/Delete/[id].
+        /// Deletes a Price Alert.
+        /// </summary>
+        /// <param name="id">Id of the alert to delete.</param>
+        /// <param name="editPriceAlert">Details of the alert.</param>
+        [HttpPost]
+        [ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id, [Bind("DeleteCode")] EditPriceAlertViewModel editPriceAlert)
         {
-            if (_context.PriceAlertNotification == null)
+            if (this.context.PriceAlertNotification == null)
             {
-                return Problem("Entity set 'RealertContext.PriceAlertNotification' is null.");
+                return this.Problem("Entity set 'RealertContext.PriceAlertNotification' is null.");
             }
 
             // Find the alert with the supplied Id and verify it exists.
-            var priceAlertNotification = await _context.PriceAlertNotification.FindAsync(id);
+            var priceAlertNotification = await this.context.PriceAlertNotification.FindAsync(id);
             if (priceAlertNotification == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user, 
+            // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user,
             // this ensures only the user receiving the emails/texts can delete the alert.
             if (priceAlertNotification.DeleteCode != editPriceAlert.DeleteCode)
-            {            
-                return RedirectToAction("Delete", new { id, displayError = true });
+            {
+                return this.RedirectToAction("Delete", new { id, displayError = true });
             }
 
             // Delete the price alert.
-            await _priceAlertService.DeleteAlertAsync(priceAlertNotification);
+            await this.priceAlertService.DeleteAlertAsync(priceAlertNotification);
 
-            return RedirectToAction(nameof(Index));
+            return this.RedirectToAction(nameof(this.Index));
         }
     }
 }

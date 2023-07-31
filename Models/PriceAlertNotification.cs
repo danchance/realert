@@ -62,7 +62,7 @@ namespace Realert.Models
         public string? Email { get; set; }
 
         /// <value>
-        /// Email address, populated if NotificationType = Text.
+        /// Phone number, populated if NotificationType = Text.
         /// </value>
         public string? PhoneNumber { get; set; }
 
