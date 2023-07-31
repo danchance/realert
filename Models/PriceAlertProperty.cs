@@ -2,65 +2,82 @@
 
 namespace Realert.Models
 {
-    /*
-     * Information about a property for a Price Alert.
-     */
+    /// <summary>
+    /// Model <see cref="PriceAlertProperty"/> holds details of a property for a Price Alert.
+    /// </summary>
     public class PriceAlertProperty
     {
+        // Fields.
+        private int lastScannedPrice;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PriceAlertProperty"/> class.
+        /// Set initial values for the NumberOfPriceChanges timestamp and the LastPriceChangeDate.
+        /// </summary>
+        public PriceAlertProperty()
+        {
+            this.NumberOfPriceChanges = 0;
+            this.LastPriceChangeDate = DateTime.Today;
+        }
+
+        // Properties.
+
+        /// <value>
+        /// Unique Id.
+        /// </value>
         public int Id { get; set; }
 
-        /*
-         * Property name/address.
-         */
+        /// <value>
+        /// Name/address of the property.
+        /// </value>
         public string? PropertyName { get; set; }
 
-        /*
-         * Price when notification was first setup.
-         */ 
+        /// <value>
+        /// Price of the property when the notification was first setup.
+        /// </value>
         public int FirstScannedPrice { get; set; }
 
-        /*
-         * Price as of the last scan.
-         */
-        private int _lastScannedPrice;
+        /// <value>
+        /// Price of the property as of the last scan.
+        /// </value>
         public int LastScannedPrice
         {
-            get { return _lastScannedPrice;  }
-            set 
+            get
             {
-                LastPriceChangeDate = DateTime.Today;
-                if (value != FirstScannedPrice) 
+                return this.lastScannedPrice;
+            }
+
+            set
+            {
+                this.LastPriceChangeDate = DateTime.Today;
+                if (value != this.FirstScannedPrice)
                 {
-                    NumberOfPriceChanges++;
+                    this.NumberOfPriceChanges++;
                 }
-                _lastScannedPrice = value;
+
+                this.lastScannedPrice = value;
             }
         }
 
-        /*
-         * Number of times the price has increased/decreased.
-         */
+        /// <value>
+        /// Number of times the property price has increased/decreased.
+        /// </value>
         public int NumberOfPriceChanges { get; private set; }
 
-        /*
-         * Date of the last price change.
-         */
+        /// <value>
+        /// Date of the last price change.
+        /// </value>
         [DataType(DataType.Date)]
         public DateTime LastPriceChangeDate { get; private set; }
 
-        /*
-         * Associated notification.
-         */
+        /// <value>
+        /// Associated Notification.
+        /// </value>
         public int PriceAlertNotificationId { get; set; }
-        public virtual PriceAlertNotification? Notification { get; set; }
 
-        /*
-         * Set initial values.
-         */
-        public PriceAlertProperty()
-        {
-            NumberOfPriceChanges = 0;
-            LastPriceChangeDate = DateTime.Today;
-        }
+        /// <value>
+        /// Associated Notification.
+        /// </value>
+        public virtual PriceAlertNotification? Notification { get; set; }
     }
 }

@@ -19,6 +19,12 @@ dotnet_diagnostic.SA1122.severity = None
 # Elements should be documented
 dotnet_diagnostic.SA1604.severity = None
 
+# Enums should be documented
+dotnet_diagnostic.SA1602.severity = None
+
+# File may only contain a single type
+dotnet_diagnostic.SA1402.severity = None
+
 csharp_indent_labels = one_less_than_current
 csharp_using_directive_placement = outside_namespace:silent
 csharp_prefer_simple_using_statement = true:suggestion
