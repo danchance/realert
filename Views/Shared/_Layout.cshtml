@@ -8,32 +8,29 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Realert.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav>
+<body class="flex flex-col h-screen">
+    <header class="bg-green-500 h-20 p-2 sm:p-4">
+        <nav class="max-w-screen-xl mx-auto bg-blue-700">
             <div>
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Realert</a>
-                <button type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                </button>
+                <a class="" asp-area="" asp-controller="Home" asp-action="Index">Realert</a>
                 <div>
                     <ul>
                         <li>
-                            <a asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a asp-area="" asp-controller="PriceAlertNotification" asp-action="Index">Price Alert</a>
+                            <a asp-area="" asp-controller="NewPropertyAlertNotification" asp-action="Index">New Property Alert</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container mx-auto px-4">
-        <main role="main">
+    <div class="mb-auto p-2 sm:p-4">
+        <main role="main" class="max-w-screen-xl mx-auto">
             @RenderBody()
         </main>
     </div>
-
-    <footer>
-        <div>
+    <footer class="bg-green-500 h-20 p-2 sm:p-4">
+        <div class="max-w-screen-xl mx-auto">
             &copy; 2023 - Realert - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>

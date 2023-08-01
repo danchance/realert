@@ -22,7 +22,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Index()
         {
-            return this.View(new PriceAlertSetupViewModel());
+            return this.View("Create", new PriceAlertSetupViewModel());
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            return this.View("Index");
+            return this.RedirectToAction(nameof(this.Index));
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace Realert.Controllers
         {
             if (!this.ModelState.IsValid)
             {
-                return this.View("Index", priceAlert);
+                return this.View("Create", priceAlert);
             }
 
             // Create new price alert notification.
@@ -103,7 +103,7 @@ namespace Realert.Controllers
             catch (Exception)
             {
                 this.ModelState.AddModelError("ListingLink", "Please enter a valid link. Supported sites are: Rightmove and Purplebricks.");
-                return this.View("Index", priceAlert);
+                return this.View("Create", priceAlert);
             }
 
             try
