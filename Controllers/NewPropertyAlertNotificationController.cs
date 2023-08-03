@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Interfaces;
 using Realert.Models;
+using Realert.Models.ViewModels;
 
 namespace Realert.Controllers
 {
@@ -85,14 +86,14 @@ namespace Realert.Controllers
         {
             if (id == null || this.context.NewPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Get details for the notification and the associated property.
             var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
             if (newPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             var editNewPropertyAlertViewModel = new EditNewPropertyAlertViewModel
@@ -139,20 +140,26 @@ namespace Realert.Controllers
             var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FindAsync(id);
             if (newPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user,
             // this ensures only the user receiving the emails can delete the alert.
             if (newPropertyAlertNotification.DeleteCode != editNewPropertyAlert.DeleteCode)
             {
-                return this.RedirectToAction("Delete", new { id, displayError = true });
+                return this.RedirectToAction(nameof(this.Delete), new { id, displayError = true });
             }
+
+            // Setup delted view model for the success page.
+            NewPropertyAlertDeletedViewModel deletedNewPropertyAlert = new ()
+            {
+                NotificationName = newPropertyAlertNotification.NotificationName,
+            };
 
             // Delete the price alert.
             await this.newPropertyAlertService.DeleteAlertAsync(newPropertyAlertNotification);
 
-            return this.RedirectToAction(nameof(this.Index));
+            return this.View("Deleted", deletedNewPropertyAlert);
         }
     }
 }

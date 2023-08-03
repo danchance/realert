@@ -193,7 +193,9 @@ namespace Realert.Controllers
             // Setup deleted view model for the success page.
             PriceAlertDeletedViewModel deletedPriceAlert = new ()
             {
-                ContactDetails = "email@email.com",
+                ContactDetails = priceAlertNotification.NotificationType == Notification.Email ?
+                    priceAlertNotification.Email :
+                    priceAlertNotification.PhoneNumber,
                 PropertyName = priceAlertNotification.Property!.PropertyName,
             };
 
