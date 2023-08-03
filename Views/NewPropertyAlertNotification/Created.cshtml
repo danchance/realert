@@ -6,10 +6,10 @@
 <div class="grid grid-cols-1 gap-x-6 mx-auto w-fit mt-6 sm:grid-cols-[250px_1fr]">
     <image class="mx-auto" src="/assets/house.png" alt="house" />
     <div class="flex justify-center flex-col mt-4 sm:mt-0">
-        <h1 class="text-center mb-4 text-4xl font-extrabold text-gray-900 sm:text-left">Your New Property Alert has been deleted.</h1>
+        <h1 class="text-center mb-4 text-4xl font-extrabold text-gray-900 sm:text-left">New Property Alert added!</h1>
         <h2 class="text-center mb-8 text-base font-normal text-gray-500 sm:text-lg sm:text-left">
-            You will no longer receive notifications for: 
-            <span class="font-medium text-blue-600">@Html.DisplayFor(model => model.NotificationName)</span>
+            Your New Property Alert has been successfully added. If we find any new properties we'll let you know at:
+            <span class="font-medium text-blue-600">@Html.DisplayFor(model => model.Email)</span>
         </h2>
     </div>
 </div>

@@ -2,7 +2,7 @@
 {
     public interface IAlertService<T>
     {
-        Task AddAlertAsync(T alert);
+        Task<int> AddAlertAsync(T alert);
 
         Task DeleteAlertAsync(T alert);
 

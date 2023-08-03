@@ -35,6 +35,20 @@ namespace Realert.Controllers
         }
 
         /// <summary>
+        /// GET: NewPropertyAlertNotification/Created.
+        /// </summary>
+        /// <param name="successNewPropertyAlert">Details of the added new property alert.</param>
+        public IActionResult Created(NewPropertyAlertSuccessViewModel successNewPropertyAlert)
+        {
+            if (successNewPropertyAlert.Email == null || successNewPropertyAlert.NotificationName == null)
+            {
+                return this.RedirectToAction(nameof(this.Index));
+            }
+
+            return this.View("Created", successNewPropertyAlert);
+        }
+
+        /// <summary>
         /// POST: NewPropertyAlertNotification/Create.
         /// Adds a New Property Alert.
         /// </summary>
@@ -64,17 +78,17 @@ namespace Realert.Controllers
                 MaxBeds = newPropertyAlert.MaxBeds,
             };
 
-            // Add new notification to the database.
-            try
+            // Setup success view model.
+            NewPropertyAlertSuccessViewModel createdNewPropertyAlert = new ()
             {
-                await this.newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                NotificationName = newPropertyAlertNotification.NotificationName,
+                Email = newPropertyAlertNotification.Email,
+            };
 
-            return this.RedirectToAction(nameof(this.Index));
+            // Add the New Property Alert.
+            await this.newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
+
+            return this.RedirectToAction(nameof(this.Created), createdNewPropertyAlert);
         }
 
         /// <summary>
@@ -150,8 +164,8 @@ namespace Realert.Controllers
                 return this.RedirectToAction(nameof(this.Delete), new { id, displayError = true });
             }
 
-            // Setup delted view model for the success page.
-            NewPropertyAlertDeletedViewModel deletedNewPropertyAlert = new ()
+            // Setup success view model.
+            NewPropertyAlertSuccessViewModel deletedNewPropertyAlert = new ()
             {
                 NotificationName = newPropertyAlertNotification.NotificationName,
             };

@@ -24,8 +24,8 @@ namespace Realert.Services
         /// Method adds a Price Alert and performs a scan for the initial property price.
         /// </summary>
         /// <param name="priceAlert">Alert to add.</param>
-        /// <returns>Async operation.</returns>
-        public async Task AddAlertAsync(PriceAlertNotification priceAlert)
+        /// <returns>Id of the alert added.</returns>
+        public async Task<int> AddAlertAsync(PriceAlertNotification priceAlert)
         {
             // Fetch details of the property.
             // Note: Do this before adding the alert as this will also validate if the
@@ -42,7 +42,7 @@ namespace Realert.Services
             int id = priceAlert.Id;
             this.logger.LogInformation("Price Alert Added, Id = {id}", id);
 
-            return;
+            return id;
         }
 
         /// <summary>

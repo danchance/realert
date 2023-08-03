@@ -35,6 +35,20 @@ namespace Realert.Controllers
         }
 
         /// <summary>
+        /// GET: PriceAlertNotification/Created.
+        /// </summary>
+        /// <param name="successPriceAlert">Details of the added price alert.</param>
+        public IActionResult Created(PriceAlertSuccessViewModel successPriceAlert)
+        {
+            if (successPriceAlert.ContactDetails == null || successPriceAlert.PropertyName == null)
+            {
+                return this.RedirectToAction(nameof(this.Index));
+            }
+
+            return this.View("Created", successPriceAlert);
+        }
+
+        /// <summary>
         /// GET PriceAlertNotification/Property/[id].
         /// Displays information about the property linked to the Price Alert.
         /// </summary>
@@ -107,16 +121,22 @@ namespace Realert.Controllers
                 return this.View("Create", priceAlert);
             }
 
-            try
-            {
-                await this.priceAlertService.AddAlertAsync(priceAlertNotification);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            // Add the Price Alert.
+            int id = await this.priceAlertService.AddAlertAsync(priceAlertNotification);
 
-            return this.RedirectToAction(nameof(this.Index));
+            // Read the price alert to get the property details for the success message.
+            var newPriceAlert = await this.context.PriceAlertNotification.Include("Property").FirstAsync(n => n.Id == id);
+
+            // Setup success view model.
+            PriceAlertSuccessViewModel createdPriceAlert = new ()
+            {
+                ContactDetails = newPriceAlert.NotificationType == Notification.Email ?
+                    newPriceAlert.Email :
+                    newPriceAlert.PhoneNumber,
+                PropertyName = newPriceAlert.Property!.PropertyName,
+            };
+
+            return this.RedirectToAction(nameof(this.Created), createdPriceAlert);
         }
 
         /// <summary>
@@ -190,8 +210,8 @@ namespace Realert.Controllers
                 return this.RedirectToAction(nameof(this.Delete), new { id, displayError = true });
             }
 
-            // Setup deleted view model for the success page.
-            PriceAlertDeletedViewModel deletedPriceAlert = new ()
+            // Setup success view model.
+            PriceAlertSuccessViewModel deletedPriceAlert = new ()
             {
                 ContactDetails = priceAlertNotification.NotificationType == Notification.Email ?
                     priceAlertNotification.Email :
