@@ -22,7 +22,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Index()
         {
-            return this.View(new NewPropertyAlertSetupViewModel());
+            return this.View("Create", new NewPropertyAlertSetupViewModel());
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            return this.View("Index");
+            return this.RedirectToAction(nameof(this.Index));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Realert.Controllers
         {
             if (!this.ModelState.IsValid)
             {
-                return this.View("Index", newPropertyAlert);
+                return this.View("Create", newPropertyAlert);
             }
 
             // Create new property alert notification.
