@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="~/Realert.styles.css" asp-append-version="true" />
 </head>
 <body class="flex flex-col h-screen">
-    <header class="bg-green-500 p-2 mb-4 sm:p-4">
+    <header class="bg-green-500 p-2 sm:p-4">
         <nav>
             <div class="flex items-center justify-between gap-8">
                 <div class="py-2 px-4 ring-4 ring-white ring-inset">
@@ -32,18 +32,18 @@
             </div>
         </nav>
     </header>
-    <div class="mb-auto p-2 sm:p-4">
-        <main role="main" class="max-w-screen-xl mx-auto">
+    <div class="mb-auto">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
     <footer class="bg-green-500 mt-4 p-2 sm:p-4">
         <div class="max-w-screen-xl mx-auto font-medium text-base text-center text-gray-900">
-            &copy; 2023  -  ReAlert  -  
-            <a class="hover:underline" href="https://github.com/danchance/realert" target="_blank">GitHub</a>
+            &copy; 2023  -  ReAlert  -
+            <a class="hover:underline hover:text-blue-600" href="https://github.com/danchance/realert" target="_blank">GitHub</a>
         </div>
     </footer>
-    <div class="bg-green-400 bg-purple-700" hidden aria-hidden="true" ></div>
+    <div class="bg-green-400 bg-purple-700" hidden aria-hidden="true"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/flowbite.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
