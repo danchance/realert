@@ -1,0 +1,18 @@
+﻿@model Realert.Models.ViewModels.PriceAlertSuccessViewModel
+
+@{
+    ViewData["Title"] = "Price Alert";
+}
+
+<div class="grid grid-cols-1 gap-x-6 mx-auto w-fit mt-6 sm:grid-cols-[250px_1fr]">
+    <image class="mx-auto" src="/assets/house.png" alt="house" />
+    <div class="flex justify-center flex-col mt-4 sm:mt-0">
+        <h1 class="text-center mb-4 text-4xl font-extrabold text-gray-900 sm:text-left">Price Alert added!</h1>
+        <h2 class="text-center mb-8 text-base font-normal text-gray-500 sm:text-lg sm:text-left">
+            A Price Alert for
+            <span class="font-medium text-blue-600">@Html.DisplayFor(model => model.PropertyName)</span>
+            has been successfully created. If anything changes with the property we'll let you know at: 
+            <span class="font-medium text-blue-600">@Html.DisplayFor(model => model.ContactDetails)</span>
+        </h2>
+    </div>
+</div>

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Interfaces;
 using Realert.Models;
+using Realert.Models.ViewModels;
 
 namespace Realert.Controllers
 {
@@ -22,7 +23,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Index()
         {
-            return this.View(new NewPropertyAlertSetupViewModel());
+            return this.View("Create", new NewPropertyAlertSetupViewModel());
         }
 
         /// <summary>
@@ -30,7 +31,21 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            return this.View("Index");
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        /// <summary>
+        /// GET: NewPropertyAlertNotification/Created.
+        /// </summary>
+        /// <param name="successNewPropertyAlert">Details of the added new property alert.</param>
+        public IActionResult Created(NewPropertyAlertSuccessViewModel successNewPropertyAlert)
+        {
+            if (successNewPropertyAlert.Email == null || successNewPropertyAlert.NotificationName == null)
+            {
+                return this.RedirectToAction(nameof(this.Index));
+            }
+
+            return this.View("Created", successNewPropertyAlert);
         }
 
         /// <summary>
@@ -44,7 +59,7 @@ namespace Realert.Controllers
         {
             if (!this.ModelState.IsValid)
             {
-                return this.View("Index", newPropertyAlert);
+                return this.View("Create", newPropertyAlert);
             }
 
             // Create new property alert notification.
@@ -63,17 +78,17 @@ namespace Realert.Controllers
                 MaxBeds = newPropertyAlert.MaxBeds,
             };
 
-            // Add new notification to the database.
-            try
+            // Setup success view model.
+            NewPropertyAlertSuccessViewModel createdNewPropertyAlert = new ()
             {
-                await this.newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                NotificationName = newPropertyAlertNotification.NotificationName,
+                Email = newPropertyAlertNotification.Email,
+            };
 
-            return this.RedirectToAction(nameof(this.Index));
+            // Add the New Property Alert.
+            await this.newPropertyAlertService.AddAlertAsync(newPropertyAlertNotification);
+
+            return this.RedirectToAction(nameof(this.Created), createdNewPropertyAlert);
         }
 
         /// <summary>
@@ -85,14 +100,14 @@ namespace Realert.Controllers
         {
             if (id == null || this.context.NewPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Get details for the notification and the associated property.
             var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FirstOrDefaultAsync(n => n.Id == id);
             if (newPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             var editNewPropertyAlertViewModel = new EditNewPropertyAlertViewModel
@@ -139,20 +154,26 @@ namespace Realert.Controllers
             var newPropertyAlertNotification = await this.context.NewPropertyAlertNotification.FindAsync(id);
             if (newPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user,
             // this ensures only the user receiving the emails can delete the alert.
             if (newPropertyAlertNotification.DeleteCode != editNewPropertyAlert.DeleteCode)
             {
-                return this.RedirectToAction("Delete", new { id, displayError = true });
+                return this.RedirectToAction(nameof(this.Delete), new { id, displayError = true });
             }
+
+            // Setup success view model.
+            NewPropertyAlertSuccessViewModel deletedNewPropertyAlert = new ()
+            {
+                NotificationName = newPropertyAlertNotification.NotificationName,
+            };
 
             // Delete the price alert.
             await this.newPropertyAlertService.DeleteAlertAsync(newPropertyAlertNotification);
 
-            return this.RedirectToAction(nameof(this.Index));
+            return this.View("Deleted", deletedNewPropertyAlert);
         }
     }
 }

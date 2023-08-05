@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Realert.Data;
 using Realert.Interfaces;
 using Realert.Models;
+using Realert.Models.ViewModels;
 
 namespace Realert.Controllers
 {
@@ -22,7 +23,7 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Index()
         {
-            return this.View(new PriceAlertSetupViewModel());
+            return this.View("Create", new PriceAlertSetupViewModel());
         }
 
         /// <summary>
@@ -30,7 +31,21 @@ namespace Realert.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            return this.View("Index");
+            return this.RedirectToAction(nameof(this.Index));
+        }
+
+        /// <summary>
+        /// GET: PriceAlertNotification/Created.
+        /// </summary>
+        /// <param name="successPriceAlert">Details of the added price alert.</param>
+        public IActionResult Created(PriceAlertSuccessViewModel successPriceAlert)
+        {
+            if (successPriceAlert.ContactDetails == null || successPriceAlert.PropertyName == null)
+            {
+                return this.RedirectToAction(nameof(this.Index));
+            }
+
+            return this.View("Created", successPriceAlert);
         }
 
         /// <summary>
@@ -42,13 +57,13 @@ namespace Realert.Controllers
         {
             if (id == null || this.context.NewPropertyAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             var priceAlertNotification = await this.context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             var editPriceAlertViewModel = new EditPriceAlertViewModel
@@ -78,7 +93,7 @@ namespace Realert.Controllers
         {
             if (!this.ModelState.IsValid)
             {
-                return this.View("Index", priceAlert);
+                return this.View("Create", priceAlert);
             }
 
             // Create new price alert notification.
@@ -103,19 +118,25 @@ namespace Realert.Controllers
             catch (Exception)
             {
                 this.ModelState.AddModelError("ListingLink", "Please enter a valid link. Supported sites are: Rightmove and Purplebricks.");
-                return this.View("Index", priceAlert);
+                return this.View("Create", priceAlert);
             }
 
-            try
-            {
-                await this.priceAlertService.AddAlertAsync(priceAlertNotification);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            // Add the Price Alert.
+            int id = await this.priceAlertService.AddAlertAsync(priceAlertNotification);
 
-            return this.RedirectToAction(nameof(this.Index));
+            // Read the price alert to get the property details for the success message.
+            var newPriceAlert = await this.context.PriceAlertNotification.Include("Property").FirstAsync(n => n.Id == id);
+
+            // Setup success view model.
+            PriceAlertSuccessViewModel createdPriceAlert = new ()
+            {
+                ContactDetails = newPriceAlert.NotificationType == Notification.Email ?
+                    newPriceAlert.Email :
+                    newPriceAlert.PhoneNumber,
+                PropertyName = newPriceAlert.Property!.PropertyName,
+            };
+
+            return this.RedirectToAction(nameof(this.Created), createdPriceAlert);
         }
 
         /// <summary>
@@ -127,14 +148,14 @@ namespace Realert.Controllers
         {
             if (id == null || this.context.PriceAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Get details for the notification and the associated property.
             var priceAlertNotification = await this.context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             var editPriceAlertViewModel = new EditPriceAlertViewModel
@@ -176,23 +197,32 @@ namespace Realert.Controllers
             }
 
             // Find the alert with the supplied Id and verify it exists.
-            var priceAlertNotification = await this.context.PriceAlertNotification.FindAsync(id);
+            var priceAlertNotification = await this.context.PriceAlertNotification.Include("Property").FirstOrDefaultAsync(n => n.Id == id);
             if (priceAlertNotification == null)
             {
-                return this.NotFound();
+                return this.RedirectToAction(nameof(this.Index));
             }
 
             // Verify the DeleteCode of the alert matches the DeleteCode supplied by the user,
             // this ensures only the user receiving the emails/texts can delete the alert.
             if (priceAlertNotification.DeleteCode != editPriceAlert.DeleteCode)
             {
-                return this.RedirectToAction("Delete", new { id, displayError = true });
+                return this.RedirectToAction(nameof(this.Delete), new { id, displayError = true });
             }
+
+            // Setup success view model.
+            PriceAlertSuccessViewModel deletedPriceAlert = new ()
+            {
+                ContactDetails = priceAlertNotification.NotificationType == Notification.Email ?
+                    priceAlertNotification.Email :
+                    priceAlertNotification.PhoneNumber,
+                PropertyName = priceAlertNotification.Property!.PropertyName,
+            };
 
             // Delete the price alert.
             await this.priceAlertService.DeleteAlertAsync(priceAlertNotification);
 
-            return this.RedirectToAction(nameof(this.Index));
+            return this.View("Deleted", deletedPriceAlert);
         }
     }
 }

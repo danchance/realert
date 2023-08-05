@@ -24,13 +24,15 @@ namespace Realert.Services
         /// </summary>
         /// <param name="newPropertyAlert">Alert to add.</param>
         /// <returns>Async operation.</returns>
-        public async Task AddAlertAsync(NewPropertyAlertNotification newPropertyAlert)
+        public async Task<int> AddAlertAsync(NewPropertyAlertNotification newPropertyAlert)
         {
             this.context.Add(newPropertyAlert);
             await this.context.SaveChangesAsync();
 
             int id = newPropertyAlert.Id;
             this.logger.LogInformation("New Property Alert Added, Id = {id}", id);
+
+            return id;
         }
 
         /// <summary>

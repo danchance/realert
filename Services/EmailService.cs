@@ -7,7 +7,7 @@ namespace Realert.Services
     public sealed class EmailService : IEmailService
     {
         // Email address alerts are sent from.
-        private const string SenderAddress = "dan.chance@outlook.com";
+        private const string SenderAddress = "realertnotify@gmail.com";
 
         // Fields.
         private readonly IAmazonSimpleEmailService amazonSimpleEmailService;

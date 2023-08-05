@@ -1,6 +1,59 @@
 ﻿@{
     ViewData["Title"] = "Home";
+    Layout = "_HomeLayout";
 }
 
-<div>
+<div class="">
+    <div class="relative h-48 w-full sm:h-96">
+        <img class="block h-full w-full object-cover" src="/assets/hero.jpg" />
+        <div class="absolute top-1/4 left-1/2 translate-x-[-50%] w-fit py-2.5 px-5 ring-[10px] ring-green-500 bg-white/70 sm:ring-[16px] sm:py-3.5 sm:px-7">
+            <h1 class="text-center font-bold text-4xl mb-4 text-green-500 underline underline-offset-4 sm:text-8xl">
+                ReAlert
+            </h1>
+        </div>
+    </div>
+    <div class="relative mt-20">
+        <div class="absolute bg-gray-200 w-full h-96 z-0"></div>
+        <div class="relative z-10 700 p-2 max-w-screen-xl mx-auto mb-4">
+            <h2 class="text-center mb-8 mt-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 sm:text-5xl">
+                Get 
+                <span class="text-green-500">Notified</span>
+                When Something Changes
+            </h2>
+            <p class="text-center text-gray-800 max-w-screen-sm mx-auto">
+                Setup property alerts to get notified when the price changes or new properties matching your requirements are found. No account required!
+            </p>
+        </div>
+        <div class="relative max-w-screen-xl mx-auto p-2 pb-0 sm:p-4 sm:pb-0 z-10">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 mx-auto w-fit">
+                <div class="flex flex-col items-center gap-4 bg-sky-500 p-8 max-w-md justify-between">
+                    <h2 class="text-center text-2xl font-extrabold text-white tracking-wide">PRICE ALERT</h2>
+                    <div class="w-full h-80 flex items-center justify-center">
+                        <image class="max-h-full max-w-full" src="/assets/house.png" alt="house" />
+                    </div>
+                    <p class="text-base font-normal text-gray-800 text-center">
+                        Setup a Price Alert for a property to get notified when the price goes down (or up).
+                    </p>
+                    <a class="text-center text-white bg-sky-500 ring-4 ring-sky-300 font-semibold text-lg px-6 py-3 mt-2 focus:outline-none hover:underline" asp-area="" asp-controller="PriceAlertNotification" asp-action="Index">
+                        Create Price Alert.
+                    </a>
+                </div>
+                <div class="flex flex-col items-center gap-4 bg-teal-500 p-8 max-w-md justify-between">
+                    <h2 class="text-center text-2xl font-extrabold text-white tracking-wide">NEW PROPERTY ALERT</h2>
+                    <div class="w-full h-80 flex items-center justify-center">
+                        <image class="max-h-full max-w-full" src="/assets/house.png" alt="house" />
+                    </div>
+                    <p class="text-base font-normal text-gray-800 text-center">
+                        Setup a New Property Alert to get notified of any new property listings that match your requirements.
+                    </p>
+                    <a class="text-center text-white bg-teal-500 ring-4 ring-teal-300 font-semibold text-lg px-6 py-3 mt-2 focus:outline-none hover:underline" asp-area="" asp-controller="NewPropertyAlertNotification" asp-action="Index">
+                        Create New Property Alert.
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+
+

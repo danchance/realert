@@ -1,79 +1,94 @@
 ﻿@model Realert.Models.EditPriceAlertViewModel 
 
 @{
+    ViewData["Title"] = "Delete Price Alert";
 }
 
-<h1 class="mb-6 text-3xl font-extrabold text-gray-900">Manage Price Alert Notification</h1>
-<div class="flex items-center mb-4">
-    <h2 class="text-2xl font-bold leading-none text-gray-900 hover:text-blue-600">
-        <a href="@Model.ListingLink" target="_blank">
-            @Model.Property!.PropertyName
-        </a>
-    </h2>
-    <div class="w-fit h-fit ml-4 text-white 0 font-medium rounded-lg text-sm text-center py-1.5 px-3 @Model.TargetSiteColorClass">@Html.DisplayFor(model => model.TargetSite)</div>
-</div>
-<div class="grid grid-cols-[200px_1fr] gap-x-6">
-    <image src="/assets/house.png" alt="house" />
-    <section>
-        <div class="grid grid-cols-2">
-            <div>
-                <div class="flex items-center mb-5">
-                    <span class="inline-flex items-center text-sm text-gray-900 dark:text-gray-400">
-                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                        </svg>
-                    </span>
-                    <h3 class="mx-2 text-sm font-medium leading-none text-gray-900">
-                        Setup on:
-                        <span class="">
-                            @Html.DisplayFor(model => model.CreatedAt)
-                        </span>
-                    </h3>
-                </div>
-                <dl>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">Note</dt>
-                    <dd class="mb-3 font-light text-gray-500">@Model.Note</dd>
-                </dl>
-                <dl>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">Price Change Threshold</dt>
-                    <dd class="mb-4 font-light text-gray-500">£@Model.PriceThreshold</dd>
-                </dl>
-                <dl class="flex items-center space-x-8">
-                    <div>
-                        <dt class="mb-2 font-semibold leading-none text-gray-900">Notify on Price Increase</dt>
-                        <dd class="mb-4 font-light text-gray-500">@Model.NotifyOnPriceIncreaseString</dd>
-                    </div>
-                    <div>
-                        <dt class="mb-2 font-semibold leading-none text-gray-900">Notify when Property is Delisted</dt>
-                        <dd class="mb-4 font-light text-gray-500">@Model.NotifyOnPropertyDelistString</dd>
-                    </div>
-                </dl>
-            </div>
-            <div>
-                <dl>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">Original Price</dt>
-                    <dd class="mb-4 font-light text-gray-500">£@Model.Property.FirstScannedPrice</dd>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">Current Price</dt>
-                    <dd class="mb-4 font-light text-gray-500">£@Model.Property.LastScannedPrice</dd>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">No. of Price Drops</dt>
-                    <dd class="mb-4 font-light text-gray-500">@Model.Property.NumberOfPriceChanges</dd>
-                    <dt class="mb-2 font-semibold leading-none text-gray-900">Last Price Change</dt>
-                    <dd class="mb-4 font-light text-gray-500">@Html.DisplayFor(model => model.Property!.LastPriceChangeDate)</dd>
-                </dl>
-            </div>
+<div class="mx-auto w-fit">
+    <h1 class="mb-4 text-4xl font-extrabold text-gray-900 text-center sm:text-5xl">
+        Manage Price Alert Notification
+    </h1>
+    <p class="mb-8 text-base font-normal text-gray-500 text-center sm:text-lg">
+        Edit or delete this Price Alert.
+    </p>
+    <div class="mx-auto w-fit flex items-center mb-4">
+        <h2 class="text-2xl font-bold leading-none text-blue-600 hover:underline">
+            <a href="@Model.ListingLink" target="_blank">
+                @Model.Property!.PropertyName
+            </a>
+        </h2>
+        <div class="hidden w-fit h-fit ml-4 text-white 0 font-medium rounded-lg text-sm text-center py-1.5 px-3 @Model.TargetSiteColorClass sm:block">
+            @Html.DisplayFor(model => model.TargetSite)
         </div>
-        <form asp-controller="PriceAlertNotification" asp-action="Delete">
-            <input asp-for="DeleteCode" id="delete-code" type="text" class="hidden" readonly>
-            <button type="button" class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                <svg aria-hidden="true" class="mr-1 -ml-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
-                Edit
-            </button>
-            <button type="submit" value="Delete" class="ml-2 inline-flex items-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                Unsubscribe
-            </button>
-            <span asp-validation-for="DeleteCode" class="block mt-3 text-red-500 text-sm font-medium"></span>
-        </form>
-    </section>
+    </div>
+    <div class="mx-auto w-fit grid grid-cols-1 gap-x-6 sm:grid-cols-[250px_1fr]">
+        <image class="mx-auto" src="/assets/house.png" alt="house" />
+        <section class="mx-auto w-fit mt-4 sm:mt-0">
+            <div class="flex flex-col sm:flex-row">
+                <div class="sm:mr-16">
+                    <div class="flex items-center mb-5">
+                        <span class="inline-flex items-center text-sm text-gray-900">
+                            <svg class="w-5 h-5 text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <h3 class="mx-2 text-sm font-medium leading-none text-gray-900">
+                            Setup on:
+                            <span class="">
+                                @Html.DisplayFor(model => model.CreatedAt)
+                            </span>
+                        </h3>
+                    </div>
+                    <dl>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">Note</dt>
+                        <dd class="mb-3 font-light text-gray-500">@Model.Note</dd>
+                    </dl>
+                    <dl>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">Price Change Threshold</dt>
+                        <dd class="mb-4 font-light text-gray-500">£@Model.PriceThreshold</dd>
+                    </dl>
+                    <dl class="sm:flex sm:items-center sm:space-x-8">
+                        <div>
+                            <dt class="mb-2 font-semibold leading-none text-gray-900">Notify on Price Increase</dt>
+                            <dd class="mb-4 font-light text-gray-500">@Model.NotifyOnPriceIncreaseString</dd>
+                        </div>
+                        <div>
+                            <dt class="mb-2 font-semibold leading-none text-gray-900">Notify when Property is Delisted</dt>
+                            <dd class="mb-4 font-light text-gray-500">@Model.NotifyOnPropertyDelistString</dd>
+                        </div>
+                    </dl>
+                </div>
+                <div class="hidden sm:block">
+                    <dl>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">Original Price</dt>
+                        <dd class="mb-4 font-light text-gray-500">£@Model.Property.FirstScannedPrice</dd>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">Current Price</dt>
+                        <dd class="mb-4 font-light text-gray-500">£@Model.Property.LastScannedPrice</dd>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">No. of Price Drops</dt>
+                        <dd class="mb-4 font-light text-gray-500">@Model.Property.NumberOfPriceChanges</dd>
+                        <dt class="mb-2 font-semibold leading-none text-gray-900">Last Price Change</dt>
+                        <dd class="mb-4 font-light text-gray-500">@Html.DisplayFor(model => model.Property!.LastPriceChangeDate)</dd>
+                    </dl>
+                </div>
+            </div>
+            <form asp-controller="PriceAlertNotification" asp-action="Delete">
+                <input asp-for="DeleteCode" id="delete-code" type="text" class="hidden" readonly>
+                <button type="button" class="text-white inline-flex items-center bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    <svg aria-hidden="true" class="mr-1 -ml-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path>
+                        <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    Edit
+                </button>
+                <button type="submit" value="Delete" class="ml-2 inline-flex items-center text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                    <svg aria-hidden="true" class="w-5 h-5 mr-1.5 -ml-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Unsubscribe
+                </button>
+                <span asp-validation-for="DeleteCode" class="block mt-3 text-red-500 text-sm font-medium max-w-xs"></span>
+            </form>
+        </section>
+    </div>
 </div>
 <script src="~/js/PriceAlertNotification/EditPriceAlert.js" asp-append-version="true"></script>
