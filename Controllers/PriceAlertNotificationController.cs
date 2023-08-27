@@ -121,8 +121,18 @@ namespace Realert.Controllers
                 return this.View("Create", priceAlert);
             }
 
-            // Add the Price Alert.
-            int id = await this.priceAlertService.AddAlertAsync(priceAlertNotification);
+            int id;
+            try
+            {
+                // Add the Price Alert.
+                id = await this.priceAlertService.AddAlertAsync(priceAlertNotification);
+            }
+            catch (Exception)
+            {
+                // Error occurred adding the price alert as the property link is invali.
+                this.ModelState.AddModelError("ListingLink", "Please enter a link to a valid property. Supported sites are: Rightmove and Purplebricks.");
+                return this.View("Create", priceAlert);
+            }
 
             // Read the price alert to get the property details for the success message.
             var newPriceAlert = await this.context.PriceAlertNotification.Include("Property").FirstAsync(n => n.Id == id);
